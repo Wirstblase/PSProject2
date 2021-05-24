@@ -10,11 +10,14 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include "coin.cpp"
+#include "door.cpp"
+#include "itemGrid.cpp"
 
 //sf::Texture playerTexture;
 
 class Player {
 public:
+    int collideCooldown = 0;
     sf::Sprite playerSprite;
     Player(sf::Vector2f size) {
         player.setSize(size);
@@ -65,7 +68,22 @@ public:
         }
         return false;
     }
+    
+    bool isCollidingWithDoor(Door *door) {
+        if (player.getGlobalBounds().intersects(door->getGlobalBounds())) {
+            collideCooldown++;
+            return true;
+        }
+        return false;
+    }
+    /*bool isCollidingWithItem(Item *item) {
+        if (player.getGlobalBounds().intersects(item->getGlobalBounds())) {
+            return true;
+        }
+        return false;
+    }*/
 private:
     //sf::Sprite player;
+    int collideOnce = 1;
     sf::RectangleShape player;
 };
