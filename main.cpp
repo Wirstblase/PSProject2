@@ -41,23 +41,28 @@ int main() {
     
     // Load a music to play
     sf::Music music;
-    if (!music.openFromFile("Meadowsoundscapes.wav")) {
+    if (!music.openFromFile("bgdrone.wav")) {
+        return EXIT_FAILURE;
+    }
+    
+    sf::Music itemPickupSfx;
+    if (!itemPickupSfx.openFromFile("harp1.wav")) {
         return EXIT_FAILURE;
     }
     
     sf::Music coinPickupSfx;
-    if (!coinPickupSfx.openFromFile("coinpickup.ogg")) {
+    if (!coinPickupSfx.openFromFile("coinpickup1fixed.wav")) {
         return EXIT_FAILURE;
     }
     
     sf::Music doorCloseSfx;
-    if (!doorCloseSfx.openFromFile("close_door_1.wav")) {
+    if (!doorCloseSfx.openFromFile("close_door_1fixedfaster.wav")) {
         return EXIT_FAILURE;
     }
     
     // Play the music
     music.setLoop(true);
-    //music.play();
+    music.play();
     
     window.create(sf::VideoMode(900, 900), "gametest1", sf::Style::Titlebar | sf::Style::Close /*sf::Style::Fullscreen*/);
     window.setPosition(centerWindow);
@@ -90,7 +95,12 @@ int main() {
     }
     
     sf::Texture coinTex;
-    if (!coinTex.loadFromFile("coin1.png")) {
+    if (!coinTex.loadFromFile("coin1andbg.png")) {
+        return EXIT_FAILURE;
+    }
+    
+    sf::Texture knifeTex;
+    if (!knifeTex.loadFromFile("knife1andbg.png")) {
         return EXIT_FAILURE;
     }
     
@@ -320,6 +330,8 @@ int main() {
                         itemgrid.sprites[bb][aa].setTexture(emptyTex);
                     } else if(itmVec[jj] == 1){
                         itemgrid.sprites[bb][aa].setTexture(coinTex);
+                    } else if(itmVec[jj] == 2){
+                        itemgrid.sprites[bb][aa].setTexture(knifeTex);
                     }
                     //std::cout<<itmVec[jj]<<" ";
                     
@@ -503,8 +515,19 @@ int main() {
                         
                         //std::cout<<"COLLIDING!";
                         
-                        if(itmVec[i] == 1)
+                        if(itmVec[i] == 1){
                             std::cout<<"\nDEBUG: COIN COLLECTED\n";
+                            coinPickupSfx.stop();
+                            coinPickupSfx.play();
+                        }
+                        
+                        if(itmVec[i] == 2){
+                            
+                            std::cout<<"\nDEBUG: KNIFE COLLECTED\n";
+                            itemPickupSfx.stop();
+                            itemPickupSfx.play();
+                            
+                        }
                         
                         
                         itmVec[i] = 0;
