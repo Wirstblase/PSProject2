@@ -60,17 +60,28 @@ int main() {
     window.setKeyRepeatEnabled(true);
     
     //Player Object:
-    Player player({ 40, 40 });
+    Player player({ 40, 90 });
     player.setPos({ 50, 700 });
+    player.playerSpriteOffset({-10,0});
+    //dplayer.playerSpriteScale({-1.0,1.0});
     
     Map map;
     
     sf::Texture playerTexture;
-    if (!playerTexture.loadFromFile("ghost2.png")) {
+    if (!playerTexture.loadFromFile("penguin.png")) {
         return EXIT_FAILURE;
     }
     //const sf::Texture *playerTexture2;
     player.playerSprite.setTexture(playerTexture);
+    
+    sf::Texture emptyTex;
+    if (!emptyTex.loadFromFile("emptyTex.png")) {
+        return EXIT_FAILURE;
+    }
+    sf::Texture doorHaloTexture;
+    if (!doorHaloTexture.loadFromFile("doorhalo.png")) {
+        return EXIT_FAILURE;
+    }
     
     sf::Texture mapTexture;
     sf::Texture groundTexture1;
@@ -92,10 +103,15 @@ int main() {
     //Door objects
     
     std::vector<Door*> doorVec;
-    Door door1({40,40});
-    Door door2({40,40});
-    Door door3({40,40});
-    Door door4({40,40});
+    Door door1({120,60});
+    Door door2({120,60});
+    Door door3({120,60});
+    Door door4({120,60});
+    
+    door1.doorHaloSprite.setTexture(doorHaloTexture);
+    door2.doorHaloSprite.setTexture(doorHaloTexture);
+    door3.doorHaloSprite.setTexture(doorHaloTexture);
+    door4.doorHaloSprite.setTexture(doorHaloTexture);
     
     doorVec.push_back(&door1);
     doorVec.push_back(&door2);
@@ -107,10 +123,20 @@ int main() {
     door3.doorName = 3;
     door4.doorName = 4;
     
-    door1.setPos({0,430});
-    door2.setPos({450,60});
-    door3.setPos({860,430});
-    door4.setPos({450,860});
+    door1.setPos({-60,530});
+    door2.setPos({400,0});
+    door3.setPos({960,400});
+    door4.setPos({500,960});
+    
+    door1.doorHaloSpriteOffset({60,30});
+    door2.doorHaloSpriteOffset({-30,60});
+    door3.doorHaloSpriteOffset({-60,-30});
+    door4.doorHaloSpriteOffset({30,-60});
+    
+    door1.setRot(-90);
+    door2.setRot(0);
+    door3.setRot(90);
+    door4.setRot(180);
     
     int shouldLoadLevel = 1;
     int fileLoadValue = 0;
@@ -118,13 +144,13 @@ int main() {
     //Coin Objects:
     
     std::vector<Coin*> coinVec;
-    Coin coin1({ 20, 20 });
+    /*Coin coin1({ 20, 20 });
     Coin coin2({ 20, 20 });
     coinVec.push_back(&coin1);
     coinVec.push_back(&coin2);
     
     coin1.setPos({ 50, 600 });
-    coin2.setPos({ 750, 600 });
+    coin2.setPos({ 750, 600 });*/
     
     //Score Objects:
     
@@ -148,6 +174,8 @@ int main() {
     const float gravitySpeed = 0.3;
     bool isJumping = false;
     
+    std::cout<<"BEFORE LOOP\n";
+    
     //Main Loop:
     while (window.isOpen()) {
         
@@ -162,6 +190,44 @@ int main() {
         MyReadFile>>door2.leadsTo;
         MyReadFile>>door3.leadsTo;
         MyReadFile>>door4.leadsTo;
+            
+            
+        //doors enabling or disabling logic
+            
+            if(door1.leadsTo == 99){
+                door1.isEnabled = false;
+                door1.doorHaloSprite.setTexture(emptyTex);
+            } else
+            {
+                door1.isEnabled = true;
+                door1.doorHaloSprite.setTexture(doorHaloTexture);
+            }
+            if(door2.leadsTo == 99){
+                door2.isEnabled = false;
+                door2.doorHaloSprite.setTexture(emptyTex);
+            } else
+            {
+                door2.isEnabled = true;
+                door2.doorHaloSprite.setTexture(doorHaloTexture);
+            }
+            if(door3.leadsTo == 99){
+                door3.isEnabled = false;
+                door3.doorHaloSprite.setTexture(emptyTex);
+            } else
+            {
+                door3.isEnabled = true;
+                door3.doorHaloSprite.setTexture(doorHaloTexture);
+            }
+            if(door4.leadsTo == 99){
+                door4.isEnabled = false;
+                door4.doorHaloSprite.setTexture(emptyTex);
+            } else
+            {
+                door4.isEnabled = true;
+                door4.doorHaloSprite.setTexture(doorHaloTexture);
+            }
+            
+        //end doors enabling or disabling logic
         
         int texVec[256],n=256;
         for(int i=0;i<=256;i++){
@@ -190,7 +256,7 @@ int main() {
         
         sf::Event Event;
         
-        const float moveSpeed = 0.8;
+        const float moveSpeed = 0.4;
         
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
             player.move({ 0, -moveSpeed });
@@ -201,10 +267,25 @@ int main() {
             //isJumping = true;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+            
+            if(player.facing == 1){
+                player.playerSpriteScale({1.0,1.0});
+                player.playerSpriteOffset({-10,0});
+                player.facing = 0;
+            }
             player.move({ moveSpeed, 0 });
+        
+            
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+            
+            if(player.facing == 0){
+                player.playerSpriteScale({-1.0,1.0});
+                player.playerSpriteOffset({50,0});
+                player.facing = 1;
+            }
             player.move({ -moveSpeed, 0 });
+            
         }
         
         //Event Loop:
@@ -218,6 +299,21 @@ int main() {
                     isJumping = false;
             }
         }
+        
+        //bounds logic
+        if(player.getY() < 59){
+            player.move({0, 1});
+        }
+        if(player.getX() < -1){
+            player.move({1,0});
+        }
+        if(player.getX() > 860){
+            player.move({-1,0});
+        }
+        if(player.getY() > 860){
+            player.move({0,-1});
+        }
+        //end bounds logic
         
         //Gravity Logic:
         /*if (player.getY() < groundHeight && isJumping == false) {
@@ -240,7 +336,7 @@ int main() {
                 lblScore.setString(std::to_string(coins));
                 std::cout<<"coins:"<<coins<<"\n";
             }
-                
+            
         }
         
         //door logic
@@ -249,11 +345,43 @@ int main() {
             if (player.isCollidingWithDoor(doorVec[i])) {
                 
                 //if(collideOnce == 0){
-                if(player.collideCooldown > 1000){
+                if(player.collideCooldown > 100){
                     
                     if(doorVec[i]->leadsTo != 99){
                         fileLoadValue = doorVec[i]->leadsTo;
-                        shouldLoadLevel = 1;}
+                        shouldLoadLevel = 1;
+                    }
+                    
+                    if(i == 0){
+                        player.setPos({800,400});
+                        
+                        player.playerSpriteOffset({50,0});
+                        player.playerSpriteScale({-1.0,1.0});
+                        
+                    } else if(i == 1){
+                        player.setPos({400,750});
+                        
+                        player.playerSpriteOffset({-10,0});
+                        player.playerSpriteScale({1.0,1.0});
+                        
+                        
+                    } else if(i == 2){
+                        player.setPos({5,450});
+                        
+                        player.playerSpriteOffset({-10,0});
+                        player.playerSpriteScale({1.0,1.0});
+                        
+                        
+                    } else if(i == 3){
+                        player.setPos({400,100});
+                        
+                        player.playerSpriteOffset({-10,0});
+                        player.playerSpriteScale({1.0,1.0});
+                        
+                        
+                    }
+                    
+                    
                     
                     doorCloseSfx.stop();
                     doorCloseSfx.play();
@@ -272,13 +400,13 @@ int main() {
             
         }
         
-        //end door logic
+        //end door logica
         
         window.clear();
         map.drawTo(window);
-        coin1.drawTo(window);
+        //coin1.drawTo(window);
         window.draw(lblScore);
-        coin2.drawTo(window);
+        //coin2.drawTo(window);
         player.drawTo(window);
         
         door1.drawTo(window);

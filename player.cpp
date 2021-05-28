@@ -17,8 +17,10 @@
 
 class Player {
 public:
+    int facing = 0; //0-stanga, 1-drepta
     int collideCooldown = 0;
     sf::Sprite playerSprite;
+    
     Player(sf::Vector2f size) {
         player.setSize(size);
         player.setFillColor(sf::Color::Transparent);
@@ -30,11 +32,21 @@ public:
         //const sf::Texture *playerTexture2;
         playerSprite.setTexture(playerTexture);*/
         //playerSprite.setTextureRect(sf::IntRect(10, 10, 32, 32));
-        playerSprite.setScale(sf::Vector2f(0.2f, 0.2f));
+        playerSprite.setScale(sf::Vector2f(1.0f, 1.0f));
         //playerSprite.move(sf::Vector2f(5.0f, 1.1f));
         
         //player.setTexture(playerTexture2);
         
+    }
+    
+    void playerSpriteScale(sf::Vector2f scale){
+        playerSprite.setScale(scale);
+    }
+    
+    void playerSpriteOffset(sf::Vector2f offset){
+        sf::Vector2f pos = player.getPosition();
+        //playerSprite.move(pos + offset);
+        playerSprite.setPosition(pos + offset);
     }
     
     void drawTo(sf::RenderWindow &window) {
@@ -60,6 +72,9 @@ public:
     
     int getY() {
         return player.getPosition().y;
+    }
+    int getX(){
+        return player.getPosition().x;
     }
     
     bool isCollidingWithCoin(Coin *coin) {
