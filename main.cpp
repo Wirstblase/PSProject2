@@ -54,17 +54,18 @@ int main() {
     music.setLoop(true);
     //music.play();
     
-    window.create(sf::VideoMode(900, 900), "gametest1", sf::Style::Titlebar | sf::Style::Close);
+    window.create(sf::VideoMode(900, 900), "gametest1", sf::Style::Titlebar | sf::Style::Close /*sf::Style::Fullscreen*/);
     window.setPosition(centerWindow);
     
     window.setKeyRepeatEnabled(true);
     
     //Player Object:
     Player player({ 40, 90 });
-    player.setPos({ 50, 700 });
+    player.setPos({ 425, 400 });
     player.playerSpriteOffset({-10,0});
     //dplayer.playerSpriteScale({-1.0,1.0});
     
+    itemGrid itemgrid;
     Map map;
     
     sf::Texture playerTexture;
@@ -86,7 +87,11 @@ int main() {
     sf::Texture mapTexture;
     sf::Texture groundTexture1;
     sf::Texture groundTexture2;
+    sf::Texture solidBlockTexture1;
     
+    if (!solidBlockTexture1.loadFromFile("solidblock1.png")) {
+        return EXIT_FAILURE;
+    } else std::cout<<"mapTexture loaded\n";
     if (!mapTexture.loadFromFile("pixeltile1.png")) {
         return EXIT_FAILURE;
     } else std::cout<<"mapTexture loaded\n";
@@ -174,7 +179,16 @@ int main() {
     const float gravitySpeed = 0.3;
     bool isJumping = false;
     
-    std::cout<<"BEFORE LOOP\n";
+    int goingLeft = 0;
+    int goingRight = 0;
+    int goingUp = 0;
+    int goingDown = 0;
+    
+    int windowFocusLost = 0;
+    
+    //std::cout<<"BEFORE LOOP\n";
+    
+    int texVec[256],n=256;
     
     //Main Loop:
     while (window.isOpen()) {
@@ -228,21 +242,23 @@ int main() {
             }
             
         //end doors enabling or disabling logic
-        
-        int texVec[256],n=256;
         for(int i=0;i<=256;i++){
             MyReadFile >> texVec[i];
-            std::cout << texVec[i] << " ";
+            //std::cout << texVec[i] << " ";
         }
         
         int i=0;
         for(int aa=0;aa<16;aa++){
             for(int bb=0;bb<16;bb++){
                 
-                if(texVec[i] == 1){
+                if(texVec[i] == 0){
+                    map.sprites[bb][aa].setTexture(emptyTex);
+                } else if(texVec[i] == 1){
                     map.sprites[bb][aa].setTexture(groundTexture1);
                 } else if(texVec[i] == 2){
                     map.sprites[bb][aa].setTexture(groundTexture2);
+                } else if(texVec[i] == 3){
+                    map.sprites[bb][aa].setTexture(solidBlockTexture1);
                 }
                 
                 i++;
@@ -256,37 +272,62 @@ int main() {
         
         sf::Event Event;
         
-        const float moveSpeed = 0.4;
+        const float moveSpeed = 0.5;
+        
+        //player movement + item collision logic??
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)){
+            
+            if(windowFocusLost == 0)
+            windowFocusLost = 1;
+            
+        }
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space)){
+            windowFocusLost = 0;
+        }
         
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+            
+            if(windowFocusLost == 0){
             player.move({ 0, -moveSpeed });
-            isJumping = true;
-        }
+                isJumping = true;
+                goingUp = 1;
+            }
+        } else {goingUp = 0;}
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-            player.move({ 0, moveSpeed });
-            //isJumping = true;
-        }
+            
+            if(windowFocusLost == 0){
+                player.move({ 0, moveSpeed });
+                goingDown = 1;
+            }
+                //isJumping = true;}
+        } else {goingDown = 0;}
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
             
+            if(windowFocusLost == 0){
             if(player.facing == 1){
                 player.playerSpriteScale({1.0,1.0});
                 player.playerSpriteOffset({-10,0});
                 player.facing = 0;
             }
-            player.move({ moveSpeed, 0 });
+                player.move({ moveSpeed, 0 });
+                goingRight = 1;
+            }
         
             
-        }
+        } else {goingRight = 0;}
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
             
+            if(windowFocusLost == 0){
             if(player.facing == 0){
                 player.playerSpriteScale({-1.0,1.0});
                 player.playerSpriteOffset({50,0});
                 player.facing = 1;
             }
-            player.move({ -moveSpeed, 0 });
+                player.move({ -moveSpeed, 0 });
+                goingLeft = 1;
+            }
             
-        }
+        } else {goingLeft = 0;}
         
         //Event Loop:
         while (window.pollEvent(Event)) {
@@ -297,8 +338,18 @@ int main() {
                     
                 case sf::Event::KeyReleased:
                     isJumping = false;
+                    
+                //case sf::Event::LostFocus:
+                    //windowFocusLost = 1;
+                    
+                //case sf::Event::GainedFocus:
+                    //windowFocusLost = 0;
+                    
             }
         }
+        
+        if(windowFocusLost == 0){
+        lblScore.setString("0");
         
         //bounds logic
         if(player.getY() < 59){
@@ -314,6 +365,44 @@ int main() {
             player.move({0,-1});
         }
         //end bounds logic
+            
+        //more bounds logic
+            
+        int i=0;
+        for(int aa=0;aa<16;aa++){
+                for(int bb=0;bb<16;bb++){
+                  
+                    
+                if((texVec[i] == 0 || texVec[i] == 4) &&player.player.getGlobalBounds().intersects(map.collRect[bb][aa].getGlobalBounds())){
+                    
+                    if(goingLeft == 1){
+                        player.move({1,0});
+                    }
+                    if(goingRight == 1){
+                        player.move({-1,0});
+                    }
+                    if(goingUp == 1){
+                        player.move({0,1});
+                    }
+                    if(goingDown == 1){
+                        player.move({0,-1});
+                    }
+                    
+                    //lblScore.setString("COLLIDING");
+                    //std::cout<<"COLLIDING";
+                }
+                
+                //if ()
+                //if(player.getGlobalBounds() == 0)
+                //i = 0;
+                
+                    
+                i++;
+            }
+        }
+        
+            
+        //end more bounds logic
         
         //Gravity Logic:
         /*if (player.getY() < groundHeight && isJumping == false) {
@@ -350,29 +439,32 @@ int main() {
                     if(doorVec[i]->leadsTo != 99){
                         fileLoadValue = doorVec[i]->leadsTo;
                         shouldLoadLevel = 1;
+                        
+                        doorCloseSfx.stop();
+                        doorCloseSfx.play();
                     }
                     
-                    if(i == 0){
+                    if(i == 0 && shouldLoadLevel == 1){
                         player.setPos({800,400});
                         
                         player.playerSpriteOffset({50,0});
                         player.playerSpriteScale({-1.0,1.0});
                         
-                    } else if(i == 1){
+                    } else if(i == 1 && shouldLoadLevel == 1){
                         player.setPos({400,750});
                         
                         player.playerSpriteOffset({-10,0});
                         player.playerSpriteScale({1.0,1.0});
                         
                         
-                    } else if(i == 2){
+                    } else if(i == 2 && shouldLoadLevel == 1){
                         player.setPos({5,450});
                         
                         player.playerSpriteOffset({-10,0});
                         player.playerSpriteScale({1.0,1.0});
                         
                         
-                    } else if(i == 3){
+                    } else if(i == 3 && shouldLoadLevel == 1){
                         player.setPos({400,100});
                         
                         player.playerSpriteOffset({-10,0});
@@ -380,11 +472,7 @@ int main() {
                         
                         
                     }
-                    
-                    
-                    
-                    doorCloseSfx.stop();
-                    doorCloseSfx.play();
+                
                     player.collideCooldown = 0;
                 }
                 //    collideOnce = 1;
@@ -399,6 +487,10 @@ int main() {
             }
             
         }
+            
+        } else {
+            lblScore.setString("GAME PAUSED, SPACE TO RESUME");
+        }//window focus lost
         
         //end door logica
         

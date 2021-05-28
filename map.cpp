@@ -15,14 +15,11 @@ public:
     //
     sf::Sprite sprites[16][16];
     
+    sf::RectangleShape collRect[16][16];
+    
     int grid[16][16]; //1-grass 2-wall 3-stone
     
     Map(){
-        
-        //std::cout<<"initializing map";
-        /*for(int i=0;i<=16;i++)
-            for(int j=0;j<=16;j++)
-                sprites[i][j].setScale(sf::Vector2f(0.2f, 0.2f));*/
         
     }
     
@@ -52,11 +49,17 @@ public:
                 //if(i%2 == 0)
                     dot.setPosition(j*distance+xoffset, i*height+yoffset);
                 
+                    collRect[j][i].setFillColor(sf::Color::Transparent);
+                    collRect[j][i].setPosition(j*distance+xoffset, i*height+yoffset);
+                    //sprites[j][i].setScale(sf::Vector2f(4.0f, 4.0f));
+                    collRect[j][i].setSize({50,50});
+                
                     sprites[j][i].setPosition(j*distance+xoffset, i*height+yoffset);
                     sprites[j][i].setScale(sf::Vector2f(4.0f, 4.0f));
                 
                 window.draw(dot);
                 window.draw(sprites[j][i]);
+                //window.draw(collRect[j][i]);
             }
         }
         

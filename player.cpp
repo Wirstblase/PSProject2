@@ -17,6 +17,9 @@
 
 class Player {
 public:
+    
+    sf::RectangleShape player;
+    
     int facing = 0; //0-stanga, 1-drepta
     int collideCooldown = 0;
     sf::Sprite playerSprite;
@@ -77,12 +80,15 @@ public:
         return player.getPosition().x;
     }
     
+    
     bool isCollidingWithCoin(Coin *coin) {
         if (player.getGlobalBounds().intersects(coin->getGlobalBounds())) {
             return true;
         }
         return false;
     }
+    
+    
     
     bool isCollidingWithDoor(Door *door) {
         if (player.getGlobalBounds().intersects(door->getGlobalBounds())) {
@@ -100,5 +106,5 @@ public:
 private:
     //sf::Sprite player;
     int collideOnce = 1;
-    sf::RectangleShape player;
+    
 };

@@ -16,7 +16,7 @@ public:
     //
     sf::Sprite sprites[16][16];
     
-    int grid[16][16]; //1-grass 2-wall 3-stone
+    int grid[16][16]; //0 - nothing 1 - coin 
     
     itemGrid(){
         
