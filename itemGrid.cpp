@@ -16,14 +16,11 @@ public:
     //
     sf::Sprite sprites[16][16];
     
-    int grid[16][16]; //0 - nothing 1 - coin 
+    sf::RectangleShape collRect[16][16];
+    
+    //int grid[16][16]; //0 - nothing 1 - coin
     
     itemGrid(){
-        
-        //std::cout<<"initializing map";
-        /*for(int i=0;i<=16;i++)
-         for(int j=0;j<=16;j++)
-         sprites[i][j].setScale(sf::Vector2f(0.2f, 0.2f));*/
         
     }
     
@@ -53,11 +50,17 @@ public:
                 //if(i%2 == 0)
                 dot.setPosition(j*distance+xoffset, i*height+yoffset);
                 
+                collRect[j][i].setPosition(j*distance+xoffset, i*height+yoffset);
+                collRect[j][i].setSize({50,50});
+                collRect[j][i].setFillColor(sf::Color::Red);
+                
                 sprites[j][i].setPosition(j*distance+xoffset, i*height+yoffset);
                 sprites[j][i].setScale(sf::Vector2f(4.0f, 4.0f));
                 
-                window.draw(dot);
+                //window.draw(collRect[j][i]);
+                //window.draw(dot);
                 window.draw(sprites[j][i]);
+                
             }
         }
         
@@ -78,7 +81,7 @@ public:
         
         sf::Vector2f newPosition = sf::Vector2f({0.0,0.0});
         
-        for(int i=1;i<=n;i++){
+        /*for(int i=1;i<=n;i++){
             for(int j=1;j<=n;i++){
                 
                 if(grid[i][j] == 2){
@@ -86,7 +89,7 @@ public:
                 }
                 
             }
-        }
+        }*/
     }
     
 private:

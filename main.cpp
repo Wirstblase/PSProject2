@@ -25,9 +25,14 @@
 //#include "door.cpp"
 #include "player.cpp"
 #include "map.cpp"
+#include "particleTest.cpp"
 //#include "itemGrid.cpp"
 
 #include <fstream>
+
+
+int itmVec[256];
+
 
 int main() {
     sf::RenderWindow window;
@@ -81,6 +86,11 @@ int main() {
     }
     sf::Texture doorHaloTexture;
     if (!doorHaloTexture.loadFromFile("doorhalo.png")) {
+        return EXIT_FAILURE;
+    }
+    
+    sf::Texture coinTex;
+    if (!coinTex.loadFromFile("coin1.png")) {
         return EXIT_FAILURE;
     }
     
@@ -144,6 +154,8 @@ int main() {
     door4.setRot(180);
     
     int shouldLoadLevel = 1;
+    int shouldUpdateItems = 0;
+    int shouldLoadItems = 1;
     int fileLoadValue = 0;
     
     //Coin Objects:
@@ -190,10 +202,22 @@ int main() {
     
     int texVec[256],n=256;
     
+    ParticleSystem particles(100); // particle related
+    sf::Clock clock; // particle related
+    
+    
+    
+    particles.setEmitter({-1000,-1000});
+    
     //Main Loop:
     while (window.isOpen()) {
         
-        if(shouldLoadLevel == 1){
+        sf::Time elapsed = clock.restart(); // particle related
+        particles.update(elapsed); // particle related
+        
+        
+        if(shouldLoadLevel == 1){  //LEVEL LOADER
+        
         
         char loadFile[20];
         snprintf(loadFile, 10, "%d.txt", fileLoadValue);
@@ -266,7 +290,71 @@ int main() {
         }
         
         MyReadFile.close();
+        // END LEVEL LOADER
+            
+        
         shouldLoadLevel = 0;
+        }
+        
+        if(shouldLoadItems == 1){
+            
+            // ITEMGRID FOR LEVEL LOADER
+            
+            char loadItemFile[20];
+            snprintf(loadItemFile, 10, "itm%d.txt", fileLoadValue);
+            
+            std::ifstream MyItemReadFile(loadItemFile);
+            
+            //std::cout<<"LOADING ITEMS FROM FILE"<<"\n\n";
+            
+            for(int i=0;i<=256;i++){
+                MyItemReadFile >> itmVec[i];
+                //std::cout << texVec[i] << " ";
+            }
+            
+            int jj=0;
+            for(int aa=0;aa<16;aa++){
+                for(int bb=0;bb<16;bb++){
+                    
+                    if(itmVec[jj] == 0){
+                        itemgrid.sprites[bb][aa].setTexture(emptyTex);
+                    } else if(itmVec[jj] == 1){
+                        itemgrid.sprites[bb][aa].setTexture(coinTex);
+                    }
+                    //std::cout<<itmVec[jj]<<" ";
+                    
+                    jj++;
+                }
+                //std::cout<<"\n";
+            }
+            
+            MyItemReadFile.close();
+            
+            //std::cout<<"\nFILE CLOSED\n\n";
+            
+            
+            // END ITEMGRID FOR LEVEL LOADER
+            
+        shouldLoadItems = 0;
+        }
+        
+        if(shouldUpdateItems == 1){
+            int jj=0;
+            for(int aa=0;aa<16;aa++){
+                for(int bb=0;bb<16;bb++){
+                    
+                    if(itmVec[jj] == 0){
+                        itemgrid.sprites[bb][aa].setTexture(emptyTex);
+                    } else if(itmVec[jj] == 1){
+                        itemgrid.sprites[bb][aa].setTexture(coinTex);
+                    }
+                    //std::cout<<itmVec[jj]<<" ";
+                    
+                    jj++;
+                }
+                //std::cout<<"\n";
+            }
+            shouldUpdateItems = 0;
         }
         
         
@@ -403,6 +491,41 @@ int main() {
         
             
         //end more bounds logic
+            
+        //item collision logic
+            
+            i=0;
+            for(int aa=0;aa<16;aa++){
+                for(int bb=0;bb<16;bb++){
+                    
+                    
+                    if(itmVec[i] != 0 && player.player.getGlobalBounds().intersects(itemgrid.collRect[bb][aa].getGlobalBounds())){
+                        
+                        //std::cout<<"COLLIDING!";
+                        
+                        if(itmVec[i] == 1)
+                            std::cout<<"\nDEBUG: COIN COLLECTED\n";
+                        
+                        
+                        itmVec[i] = 0;
+                        shouldUpdateItems = 1;
+                        
+                        //lblScore.setString("COLLIDING");
+                        //std::cout<<"COLLIDING";
+                    }
+                    
+                    //if ()
+                    //if(player.getGlobalBounds() == 0)
+                    //i = 0;
+                    
+                    
+                    i++;
+                }
+            }
+            
+            
+            
+        //end item collision logic
         
         //Gravity Logic:
         /*if (player.getY() < groundHeight && isJumping == false) {
@@ -439,6 +562,7 @@ int main() {
                     if(doorVec[i]->leadsTo != 99){
                         fileLoadValue = doorVec[i]->leadsTo;
                         shouldLoadLevel = 1;
+                        shouldLoadItems = 1;
                         
                         doorCloseSfx.stop();
                         doorCloseSfx.play();
@@ -498,8 +622,16 @@ int main() {
         map.drawTo(window);
         //coin1.drawTo(window);
         window.draw(lblScore);
+        
         //coin2.drawTo(window);
+        
+        //sf::Vector2f plcrds = ({player.getX(),player.getY()});
+        particles.setEmitter(window.mapPixelToCoords({player.getX()+15,player.getY()+30}));
+        window.draw(particles);
+        
         player.drawTo(window);
+        
+        itemgrid.drawTo(window);
         
         door1.drawTo(window);
         door2.drawTo(window);
