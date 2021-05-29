@@ -1,0 +1,18 @@
+0 -> empty SOLID
+1 -> ground 1
+2 -> ground 2
+3 -> block 1
+4 -> wall 1 SOLID
+5 -> marble 1
+6 -> plank 1
+7 -> caveBlock1
+8 -> grass 1
+9 -> rocks 1
+10 -> water left top corner
+11 -> water corner
+12 -> water corner
+13 -> water corner
+14 -> water
+
+18 -> water right
+19 -> cobble 

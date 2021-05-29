@@ -241,6 +241,9 @@ int main() {
     sf::Texture waterBottom1;
     sf::Texture waterLeft1;
     sf::Texture waterRight1;
+    sf::Texture brickBlock1;
+    
+    if(!brickBlock1.loadFromFile("brick1.png")) {return EXIT_FAILURE;}
     
     if(!marbleTexture1.loadFromFile("marble1.png")) {return EXIT_FAILURE;}
     if(!plankTexture1.loadFromFile("plank1.png")) {return EXIT_FAILURE;}
@@ -453,6 +456,8 @@ int main() {
                     map.sprites[bb][aa].setTexture(groundTexture2);
                 } else if(texVec[i] == 3){
                     map.sprites[bb][aa].setTexture(solidBlockTexture1);
+                } else if(texVec[i] == 4){
+                    map.sprites[bb][aa].setTexture(brickBlock1);
                 } else if(texVec[i] == 5){
                     map.sprites[bb][aa].setTexture(marbleTexture1);
                 } else if(texVec[i] == 6){
