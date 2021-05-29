@@ -18,6 +18,9 @@
 class Player {
 public:
     
+    int activeItem = 0;
+    sf::Sprite activeItemSprite;
+    
     sf::RectangleShape player;
     
     int facing = 0; //0-stanga, 1-drepta
@@ -44,12 +47,24 @@ public:
     
     void playerSpriteScale(sf::Vector2f scale){
         playerSprite.setScale(scale);
+        //sf::Vector2f multiplier = (2.0f,2.0f);
+        if(scale.x > 0){
+            activeItemSprite.setScale(scale + sf::Vector2f({2,2}));
+        }
+        else {
+            activeItemSprite.setScale(scale + sf::Vector2f({-2,2}));
+        }
     }
     
     void playerSpriteOffset(sf::Vector2f offset){
         sf::Vector2f pos = player.getPosition();
         //playerSprite.move(pos + offset);
         playerSprite.setPosition(pos + offset);
+        
+        
+        activeItemSprite.setPosition(pos + sf::Vector2f({5,30}));
+        
+        
     }
     
     void drawTo(sf::RenderWindow &window) {
@@ -60,17 +75,20 @@ public:
         //playerSprite.setTexture(playerTexture);
         window.draw(player);
         window.draw(playerSprite);
+        window.draw(activeItemSprite);
     }
     
     void move(sf::Vector2f distance) {
         player.move(distance);
         playerSprite.move(distance);
+        activeItemSprite.move(distance);
     }
     
     void setPos(sf::Vector2f newPos) {
         player.setPosition(newPos);
         //playerSprite.setOrigin(sf::Vector2f(newPos) - sf::Vector2f({35,22}));
         playerSprite.setPosition(newPos /*- sf::Vector2f({35,22})*/); // spawning ghost with offset
+        activeItemSprite.setPosition(newPos);
     }
     
     int getY() {

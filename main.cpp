@@ -1,6 +1,6 @@
 
 //
-// Disclaimer:
+// Disclaimer (only if you wanna compile this in xcode):
 // ----------
 //
 // This code will work only if you selected window, graphics and audio.
@@ -104,6 +104,16 @@ int main() {
         return EXIT_FAILURE;
     }
     
+    sf::Texture candy1Tex;
+    if (!candy1Tex.loadFromFile("candy1.png")) {
+        return EXIT_FAILURE;
+    }
+    
+    sf::Texture candy2Tex;
+    if (!candy2Tex.loadFromFile("candy2.png")) {
+        return EXIT_FAILURE;
+    }
+    
     sf::Texture mapTexture;
     sf::Texture groundTexture1;
     sf::Texture groundTexture2;
@@ -200,6 +210,8 @@ int main() {
     const int groundHeight = 700;
     const float gravitySpeed = 0.3;
     bool isJumping = false;
+    
+    float moveSpeed = 0.5;
     
     int goingLeft = 0;
     int goingRight = 0;
@@ -332,6 +344,10 @@ int main() {
                         itemgrid.sprites[bb][aa].setTexture(coinTex);
                     } else if(itmVec[jj] == 2){
                         itemgrid.sprites[bb][aa].setTexture(knifeTex);
+                    } else if(itmVec[jj] == 3){
+                        itemgrid.sprites[bb][aa].setTexture(candy1Tex);
+                    } else if(itmVec[jj] == 4){
+                        itemgrid.sprites[bb][aa].setTexture(candy2Tex);
                     }
                     //std::cout<<itmVec[jj]<<" ";
                     
@@ -359,6 +375,12 @@ int main() {
                         itemgrid.sprites[bb][aa].setTexture(emptyTex);
                     } else if(itmVec[jj] == 1){
                         itemgrid.sprites[bb][aa].setTexture(coinTex);
+                    } else if(itmVec[jj] == 2){
+                        itemgrid.sprites[bb][aa].setTexture(knifeTex);
+                    } else if(itmVec[jj] == 3){
+                        itemgrid.sprites[bb][aa].setTexture(candy1Tex);
+                    } else if(itmVec[jj] == 4){
+                        itemgrid.sprites[bb][aa].setTexture(candy2Tex);
                     }
                     //std::cout<<itmVec[jj]<<" ";
                     
@@ -371,8 +393,6 @@ int main() {
         
         
         sf::Event Event;
-        
-        const float moveSpeed = 0.5;
         
         //player movement + item collision logic??
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)){
@@ -449,7 +469,8 @@ int main() {
         }
         
         if(windowFocusLost == 0){
-        lblScore.setString("0");
+        //lblScore.setString("0");
+        lblScore.setString(std::to_string(coins));
         
         //bounds logic
         if(player.getY() < 59){
@@ -517,6 +538,8 @@ int main() {
                         
                         if(itmVec[i] == 1){
                             std::cout<<"\nDEBUG: COIN COLLECTED\n";
+                            coins++;
+                            lblScore.setString(std::to_string(coins));
                             coinPickupSfx.stop();
                             coinPickupSfx.play();
                         }
@@ -526,6 +549,28 @@ int main() {
                             std::cout<<"\nDEBUG: KNIFE COLLECTED\n";
                             itemPickupSfx.stop();
                             itemPickupSfx.play();
+                            
+                            player.activeItem = 2;
+                            player.activeItemSprite.setTexture(knifeTex);
+                            
+                        }
+                        
+                        if(itmVec[i] == 3){
+                            
+                            std::cout<<"\nDEBUG: BLUE CANDY COLLECTED";
+                            itemPickupSfx.stop();
+                            itemPickupSfx.play();
+                            moveSpeed = moveSpeed + 0.1;
+                            std::cout<<moveSpeed;
+                        }
+                        
+                        if(itmVec[i] == 4){
+                            
+                            std::cout<<"\nDEBUG: RED CANDY COLLECTED";
+                            itemPickupSfx.stop();
+                            itemPickupSfx.play();
+                            moveSpeed = moveSpeed - 0.1;
+                            std::cout<<moveSpeed;
                             
                         }
                         
