@@ -27,6 +27,8 @@ public:
     float damage = 0.0;
     float health = 3.0;
     
+    float movementSpeed = 0.5;
+    
     int inventory[10];
     
     void initUI(sf::Font &arial,sf::Texture &coinTexture,sf::Texture &heartTexture){

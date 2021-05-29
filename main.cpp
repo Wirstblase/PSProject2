@@ -34,6 +34,58 @@
 
 int itmVec[256];
 
+void loadPlayerStats(UI &ui){
+    std::ifstream MyStatReadFile("playerstats.txt");
+    
+    MyStatReadFile >> ui.coins;
+    MyStatReadFile >> ui.damage;
+    MyStatReadFile >> ui.health;
+    MyStatReadFile >> ui.movementSpeed;
+    MyStatReadFile >> ui.inventory[0];
+    MyStatReadFile >> ui.inventory[1];
+    MyStatReadFile >> ui.inventory[2];
+    
+    MyStatReadFile.close();
+    
+}
+
+void savePlayerStats(UI &ui){
+    
+    std::ofstream myStatWriteFile("playerstats.txt");
+    
+    myStatWriteFile << ui.coins;
+    myStatWriteFile << ui.damage;
+    myStatWriteFile << ui.health;
+    myStatWriteFile << ui.movementSpeed;
+    myStatWriteFile << ui.inventory[0];
+    myStatWriteFile << ui.inventory[1];
+    myStatWriteFile << ui.inventory[2];
+    
+    myStatWriteFile.close();
+    
+}
+
+void saveFile(int fileLoadValue){
+    
+    char loadItemFile[20];
+    snprintf(loadItemFile, 10, "itm%d.txt", fileLoadValue);
+    
+    std::ofstream MyItemWriteFile(loadItemFile);
+    
+    for (int i=0;i<=255;i++)
+    {
+        char thing[10];
+        snprintf(thing, 10, "%d" ,itmVec[i]);
+        MyItemWriteFile << thing;
+        MyItemWriteFile << " ";
+        if(i%16 == 0)
+        MyItemWriteFile << "\n";
+    }
+    
+    MyItemWriteFile.close();
+    
+}
+
 int main() {
     sf::RenderWindow window;
     
@@ -225,6 +277,8 @@ int main() {
     //ssScore << "Score: " << coins;
     
     ui.initUI(arial,coinTexWithoutBG,heart1Tex);
+    
+    loadPlayerStats(ui);
     //lblScore.setString(ssScore.str());
     
     //Gravity Variables:
@@ -232,7 +286,7 @@ int main() {
     const float gravitySpeed = 0.3;
     bool isJumping = false;
     
-    float moveSpeed = 0.5;
+    //float moveSpeed = 0.5;
     
     int goingLeft = 0;
     int goingRight = 0;
@@ -433,7 +487,7 @@ int main() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
             
             if(windowFocusLost == 0){
-            player.move({ 0, -moveSpeed });
+            player.move({ 0, -ui.movementSpeed });
                 isJumping = true;
                 goingUp = 1;
             }
@@ -441,7 +495,7 @@ int main() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
             
             if(windowFocusLost == 0){
-                player.move({ 0, moveSpeed });
+                player.move({ 0, ui.movementSpeed });
                 goingDown = 1;
             }
                 //isJumping = true;}
@@ -454,7 +508,7 @@ int main() {
                 player.playerSpriteOffset({-10,0});
                 player.facing = 0;
             }
-                player.move({ moveSpeed, 0 });
+                player.move({ ui.movementSpeed, 0 });
                 goingRight = 1;
             }
         
@@ -468,7 +522,7 @@ int main() {
                 player.playerSpriteOffset({50,0});
                 player.facing = 1;
             }
-                player.move({ -moveSpeed, 0 });
+                player.move({ -ui.movementSpeed, 0 });
                 goingLeft = 1;
             }
             
@@ -587,6 +641,7 @@ int main() {
                             player.activeItem = 2;
                             player.activeItemSprite.setTexture(knifeTex);
                             
+                            
                         }
                         
                         if(itmVec[i] == 3){
@@ -594,8 +649,8 @@ int main() {
                             std::cout<<"\nDEBUG: BLUE CANDY COLLECTED";
                             itemPickupSfx.stop();
                             itemPickupSfx.play();
-                            moveSpeed = moveSpeed + 0.1;
-                            std::cout<<moveSpeed;
+                            ui.movementSpeed = ui.movementSpeed + 0.1;
+                            std::cout<<ui.movementSpeed;
                         }
                         
                         if(itmVec[i] == 4){
@@ -603,8 +658,8 @@ int main() {
                             std::cout<<"\nDEBUG: RED CANDY COLLECTED";
                             itemPickupSfx.stop();
                             itemPickupSfx.play();
-                            moveSpeed = moveSpeed - 0.1;
-                            std::cout<<moveSpeed;
+                            ui.movementSpeed = ui.movementSpeed - 0.1;
+                            std::cout<<ui.movementSpeed;
                             
                         }
                         
@@ -622,6 +677,9 @@ int main() {
                         
                         itmVec[i] = 0;
                         shouldUpdateItems = 1;
+                        
+                        saveFile(fileLoadValue);
+                        savePlayerStats(ui);
                         
                         //lblScore.setString("COLLIDING");
                         //std::cout<<"COLLIDING";
