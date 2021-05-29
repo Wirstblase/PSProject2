@@ -23,9 +23,23 @@ public:
     sf::RectangleShape bgbox;
     sf::RectangleShape bgbox1;
     
+    sf::RectangleShape itmSlBg1;
+    sf::RectangleShape itmSlFg1;
+    sf::Sprite itmSlSp1;
+    
+    sf::RectangleShape itmSlBg2;
+    sf::RectangleShape itmSlFg2;
+    sf::Sprite itmSlSp2;
+    
+    sf::RectangleShape itmSlBg3;
+    sf::RectangleShape itmSlFg3;
+    sf::Sprite itmSlSp3;
+    
     int coins = 0;
     float damage = 0.0;
     float health = 3.0;
+    
+    int activeItem = 1; //1-3
     
     float movementSpeed = 0.5;
     
@@ -39,6 +53,12 @@ public:
         
         sf::Color color1;
         sf::Color color2;
+        sf::Color color3;
+        
+        color3.b = 128;
+        color3.r = 128;
+        color3.g = 128;
+        color3.a = 255;
         
         color2.b = 64;
         color2.r = 64;
@@ -49,6 +69,30 @@ public:
         color1.r = 32;
         color1.g = 32;
         color1.a = 255;
+        
+        itmSlBg1.setFillColor(color2);
+        itmSlBg1.setSize({40,40});
+        itmSlBg1.setPosition({750,10});
+        
+        itmSlFg1.setFillColor(color3);
+        itmSlFg1.setSize({34,34});
+        itmSlFg1.setPosition({753,13});
+        
+        itmSlBg2.setFillColor(color2);
+        itmSlBg2.setSize({40,40});
+        itmSlBg2.setPosition({800,10});
+        
+        itmSlFg2.setFillColor(color3);
+        itmSlFg2.setSize({34,34});
+        itmSlFg2.setPosition({803,13});
+        
+        itmSlBg3.setFillColor(color2);
+        itmSlBg3.setSize({40,40});
+        itmSlBg3.setPosition({850,10});
+        
+        itmSlFg3.setFillColor(color3);
+        itmSlFg3.setSize({34,34});
+        itmSlFg3.setPosition({853,13});
         
         bgbox.setSize({900,59});
         bgbox.setFillColor(color2);
@@ -100,6 +144,44 @@ public:
         lblHP.setString(healthFormatted);
         lblspd.setString(movementSpeedFormatted);
         
+        sf::Color color2;
+        sf::Color color3;
+        
+        color3.b = 128;
+        color3.r = 128;
+        color3.g = 128;
+        color3.a = 255;
+        
+        color2.b = 64;
+        color2.r = 64;
+        color2.g = 64;
+        color2.a = 255;
+        
+        if(activeItem == 1){
+            itmSlBg1.setFillColor(color2);
+            itmSlFg1.setFillColor(color3);
+            itmSlBg2.setFillColor(color3);
+            itmSlFg2.setFillColor(color2);
+            itmSlBg3.setFillColor(color3);
+            itmSlFg3.setFillColor(color2);
+            
+        } else if (activeItem == 2){
+            itmSlBg1.setFillColor(color3);
+            itmSlFg1.setFillColor(color2);
+            itmSlBg2.setFillColor(color2);
+            itmSlFg2.setFillColor(color3);
+            itmSlBg3.setFillColor(color3);
+            itmSlFg3.setFillColor(color2);
+            
+        } else if (activeItem == 3){
+            itmSlBg1.setFillColor(color3);
+            itmSlFg1.setFillColor(color2);
+            itmSlBg2.setFillColor(color3);
+            itmSlFg2.setFillColor(color2);
+            itmSlBg3.setFillColor(color2);
+            itmSlFg3.setFillColor(color3);
+        }
+        
     }
     
     void drawTo(sf::RenderWindow &window) {
@@ -111,6 +193,12 @@ public:
         window.draw(lblHP);
         window.draw(heartIcon);
         window.draw(lblspd);
+        window.draw(itmSlBg1);
+        window.draw(itmSlFg1);
+        window.draw(itmSlBg2);
+        window.draw(itmSlFg2);
+        window.draw(itmSlBg3);
+        window.draw(itmSlFg3);
         //window.draw(lblHP);
         //window.draw(lblspd);
         

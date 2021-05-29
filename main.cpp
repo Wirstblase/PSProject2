@@ -327,6 +327,8 @@ int main() {
     //Main Loop:
     while (window.isOpen()) {
         
+        player.activeItem = ui.activeItem;
+        
         ui.updateStats();
         //ui.updateCoinLabel();
         
@@ -548,6 +550,16 @@ int main() {
             }
             
         } else {goingLeft = 0;}
+        
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z)) {
+            ui.activeItem = 1;
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::X)) {
+            ui.activeItem = 2;
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::C)) {
+            ui.activeItem = 3;
+        }
         
         //Event Loop:
         while (window.pollEvent(Event)) {
