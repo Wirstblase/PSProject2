@@ -143,7 +143,7 @@ public:
         
         char healthFormatted[40],movementSpeedFormatted[40];
         
-        snprintf(movementSpeedFormatted, 10, "%.1f", movementSpeed);
+        snprintf(movementSpeedFormatted, 10, "%.2f", movementSpeed);
         snprintf(healthFormatted, 10, "%.1f", health);
         
         lblScore.setString(std::to_string(coins));

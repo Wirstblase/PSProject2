@@ -225,6 +225,38 @@ int main() {
         return EXIT_FAILURE;
     } else std::cout<<"ground texture 2 loaded\n";
     
+    
+    sf::Texture marbleTexture1;
+    sf::Texture plankTexture1;
+    sf::Texture caveBlockTex1;
+    sf::Texture grassTex1;
+    sf::Texture groundTexture1Rocks;
+    sf::Texture waterCorner1;
+    sf::Texture waterCorner2;
+    sf::Texture waterCorner3;
+    sf::Texture waterCorner4;
+    sf::Texture waterBlock1;
+    sf::Texture cobble1;
+    sf::Texture waterTop1;
+    sf::Texture waterBottom1;
+    sf::Texture waterLeft1;
+    sf::Texture waterRight1;
+    
+    if(!marbleTexture1.loadFromFile("marble1.png")) {return EXIT_FAILURE;}
+    if(!plankTexture1.loadFromFile("plank1.png")) {return EXIT_FAILURE;}
+    if(!caveBlockTex1.loadFromFile("caveblock1.png")) {return EXIT_FAILURE;}
+    if(!grassTex1.loadFromFile("grass1.png")) {return EXIT_FAILURE;}
+    if(!groundTexture1Rocks.loadFromFile("pixeltile1withrocks.png")) {return EXIT_FAILURE;}
+    if(!waterCorner1.loadFromFile("watercorner1.png")) {return EXIT_FAILURE;}
+    if(!waterCorner2.loadFromFile("watercorner2.png")) {return EXIT_FAILURE;}
+    if(!waterCorner3.loadFromFile("watercorner3.png")) {return EXIT_FAILURE;}
+    if(!waterCorner4.loadFromFile("watercorner4.png")) {return EXIT_FAILURE;}
+    if(!waterBlock1.loadFromFile("waterblock1.png")) {return EXIT_FAILURE;}
+    if(!cobble1.loadFromFile("cobblestone1.png")) {return EXIT_FAILURE;}
+    if(!waterTop1.loadFromFile("watertop1.png")) {return EXIT_FAILURE;}
+    if(!waterBottom1.loadFromFile("waterbottom1.png")) {return EXIT_FAILURE;}
+    if(!waterLeft1.loadFromFile("waterleft1.png")) {return EXIT_FAILURE;}
+    if(!waterRight1.loadFromFile("waterright1.png")) {return EXIT_FAILURE;}
     //std::string myText;
     
     
@@ -421,7 +453,40 @@ int main() {
                     map.sprites[bb][aa].setTexture(groundTexture2);
                 } else if(texVec[i] == 3){
                     map.sprites[bb][aa].setTexture(solidBlockTexture1);
+                } else if(texVec[i] == 5){
+                    map.sprites[bb][aa].setTexture(marbleTexture1);
+                } else if(texVec[i] == 6){
+                    map.sprites[bb][aa].setTexture(plankTexture1);
+                } else if(texVec[i] == 7){
+                    map.sprites[bb][aa].setTexture(caveBlockTex1);
+                } else if(texVec[i] == 8){
+                    map.sprites[bb][aa].setTexture(grassTex1);
+                } else if(texVec[i] == 9){
+                map.sprites[bb][aa].setTexture(groundTexture1Rocks);
+                }   else if(texVec[i] == 10){
+                    map.sprites[bb][aa].setTexture(waterCorner1);
+                } else if(texVec[i] == 11){
+                    map.sprites[bb][aa].setTexture(waterCorner2);
+                } else if(texVec[i] == 12){
+                    map.sprites[bb][aa].setTexture(waterCorner3);
+                } else if(texVec[i] == 13){
+                    map.sprites[bb][aa].setTexture(waterCorner4);
+                } else if(texVec[i] == 14){
+                    map.sprites[bb][aa].setTexture(waterBlock1);
+                } else if(texVec[i] == 15){
+                    map.sprites[bb][aa].setTexture(waterTop1);
+                }else if(texVec[i] == 16){
+                    map.sprites[bb][aa].setTexture(waterBottom1);
+                }else if(texVec[i] == 17){
+                    map.sprites[bb][aa].setTexture(waterLeft1);
+                }else if(texVec[i] == 18){
+                    map.sprites[bb][aa].setTexture(waterRight1);
+                }else if(texVec[i] == 19){
+                    map.sprites[bb][aa].setTexture(cobble1);
                 }
+                
+                
+                else map.sprites[bb][aa].setTexture(emptyTex);
                 
                 i++;
             }
@@ -715,7 +780,7 @@ int main() {
                             std::cout<<"\nDEBUG: BLUE CANDY COLLECTED";
                             itemPickupSfx.stop();
                             itemPickupSfx.play();
-                            ui.movementSpeed = ui.movementSpeed + 0.1;
+                            ui.movementSpeed = ui.movementSpeed + 0.05;
                             std::cout<<ui.movementSpeed;
                         }
                         
@@ -724,7 +789,7 @@ int main() {
                             std::cout<<"\nDEBUG: RED CANDY COLLECTED";
                             itemPickupSfx.stop();
                             itemPickupSfx.play();
-                            ui.movementSpeed = ui.movementSpeed - 0.1;
+                            ui.movementSpeed = ui.movementSpeed - 0.05;
                             std::cout<<ui.movementSpeed;
                             
                         }
