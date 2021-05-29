@@ -100,8 +100,18 @@ int main() {
         return EXIT_FAILURE;
     }
     
+    sf::Texture heart1Tex;
+    if (!heart1Tex.loadFromFile("heart1.png")) {
+        return EXIT_FAILURE;
+    }
+    
     sf::Texture coinTex;
     if (!coinTex.loadFromFile("coin1andbg.png")) {
+        return EXIT_FAILURE;
+    }
+    
+    sf::Texture coinTexWithoutBG;
+    if (!coinTexWithoutBG.loadFromFile("coin1.png")) {
         return EXIT_FAILURE;
     }
     
@@ -214,7 +224,7 @@ int main() {
     //std::ostringstream ssScore;
     //ssScore << "Score: " << coins;
     
-    ui.initUI(arial,coinTex);
+    ui.initUI(arial,coinTexWithoutBG,heart1Tex);
     //lblScore.setString(ssScore.str());
     
     //Gravity Variables:
@@ -572,6 +582,8 @@ int main() {
                             itemPickupSfx.stop();
                             itemPickupSfx.play();
                             
+                            ui.damage = 1;
+                            
                             player.activeItem = 2;
                             player.activeItemSprite.setTexture(knifeTex);
                             
@@ -628,30 +640,6 @@ int main() {
             
         //end item collision logic
         
-        //Gravity Logic:
-        /*if (player.getY() < groundHeight && isJumping == false) {
-            player.move({ 0, gravitySpeed });
-        }*/
-        /*if (player.getY() > 300 && isJumping == true) {
-            player.move({ 0, -gravitySpeed });
-        }*/
-        
-        //Coin Logic:
-        /*for (int i = 0; i < coinVec.size(); i++) {
-            if (player.isCollidingWithCoin(coinVec[i])) {
-                
-                
-                coinPickupSfx.stop();
-                coinPickupSfx.play();
-                
-                coinVec[i]->setPos({ 422234, 423432 });
-                coins++;
-                //lblScore.setString(std::to_string(coins));
-                ui.updateCoinLabel();
-                std::cout<<"coins:"<<coins<<"\n";
-            }
-            
-        }*/
         
         //door logic
         
@@ -701,13 +689,7 @@ int main() {
                 
                     player.collideCooldown = 0;
                 }
-                //    collideOnce = 1;
-                //}
                 
-                //coinVec[i]->setPos({ 422234, 423432 });
-                //coins++;
-                //lblScore.setString(std::to_string(coins));
-                //std::cout<<"coins:"<<coins<<"\n";
             } else if(player.isCollidingWithDoor(doorVec[i]) == false) {
                 //collideOnce = 0;
             }

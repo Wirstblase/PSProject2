@@ -14,6 +14,7 @@ class UI{
 public:
     
     sf::Sprite coinIcon;
+    sf::Sprite heartIcon;
     
     sf::Text lblScore;
     sf::Text lblHP;
@@ -26,7 +27,13 @@ public:
     float damage = 0.0;
     float health = 3.0;
     
-    void initUI(sf::Font &arial,sf::Texture &coinTexture){
+    int inventory[10];
+    
+    void initUI(sf::Font &arial,sf::Texture &coinTexture,sf::Texture &heartTexture){
+        
+        inventory[0] = 0;
+        inventory[1] = 1;
+        inventory[2] = 2;
         
         sf::Color color1;
         sf::Color color2;
@@ -54,9 +61,18 @@ public:
         lblScore.setFont(arial);
         lblScore.setString("0");
         
+        lblHP.setCharacterSize(30);
+        lblHP.setPosition({150, 10});
+        lblHP.setFont(arial);
+        lblHP.setString("3.0");
+        
         coinIcon.setTexture(coinTexture);
         coinIcon.setPosition({5,5});
         coinIcon.setScale({3.0,3.0});
+        
+        heartIcon.setTexture(heartTexture);
+        heartIcon.setPosition({100,5});
+        heartIcon.setScale({3.0,3.0});
         
     }
     
@@ -78,6 +94,8 @@ public:
         window.draw(bgbox1);
         window.draw(coinIcon);
         window.draw(lblScore);
+        window.draw(lblHP);
+        window.draw(heartIcon);
         //window.draw(lblHP);
         //window.draw(lblspd);
         
