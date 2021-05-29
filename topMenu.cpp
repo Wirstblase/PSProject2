@@ -23,7 +23,7 @@ public:
     sf::RectangleShape bgbox;
     sf::RectangleShape bgbox1;
     
-    int coins = 10;
+    int coins = 0;
     float damage = 0.0;
     float health = 3.0;
     
@@ -76,17 +76,29 @@ public:
         heartIcon.setPosition({100,5});
         heartIcon.setScale({3.0,3.0});
         
+        lblspd.setCharacterSize(30);
+        lblspd.setPosition({250, 10});
+        lblspd.setFont(arial);
+        lblspd.setString(std::to_string(coins));
+        
     }
     
     void updateCoinLabel(){
         
-        lblScore.setString(std::to_string(coins+1));
+        lblScore.setString(std::to_string(coins));
         
     }
     
     void updateStats(){
         
+        char healthFormatted[40],movementSpeedFormatted[40];
         
+        snprintf(movementSpeedFormatted, 10, "%.1f", movementSpeed);
+        snprintf(healthFormatted, 10, "%.1f", health);
+        
+        lblScore.setString(std::to_string(coins));
+        lblHP.setString(healthFormatted);
+        lblspd.setString(movementSpeedFormatted);
         
     }
     
@@ -98,6 +110,7 @@ public:
         window.draw(lblScore);
         window.draw(lblHP);
         window.draw(heartIcon);
+        window.draw(lblspd);
         //window.draw(lblHP);
         //window.draw(lblspd);
         

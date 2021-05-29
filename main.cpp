@@ -34,7 +34,9 @@
 
 int itmVec[256];
 
-void loadPlayerStats(UI &ui){
+int autosave = 0;
+
+void loadPlayerStats(UI &ui, Player &player){
     std::ifstream MyStatReadFile("playerstats.txt");
     
     MyStatReadFile >> ui.coins;
@@ -45,21 +47,34 @@ void loadPlayerStats(UI &ui){
     MyStatReadFile >> ui.inventory[1];
     MyStatReadFile >> ui.inventory[2];
     
+    player.activeItem = ui.inventory[0];
+    player.shouldUpdateItem = 1;
+    
+    //ui.updateStats();
+    //ui.updateCoinLabel();
+    
     MyStatReadFile.close();
     
 }
 
-void savePlayerStats(UI &ui){
+void savePlayerStats(UI &ui, Player &player){
     
     std::ofstream myStatWriteFile("playerstats.txt");
     
     myStatWriteFile << ui.coins;
+    myStatWriteFile << "\n";
     myStatWriteFile << ui.damage;
+    myStatWriteFile << "\n";
     myStatWriteFile << ui.health;
+    myStatWriteFile << "\n";
     myStatWriteFile << ui.movementSpeed;
+    myStatWriteFile << "\n";
     myStatWriteFile << ui.inventory[0];
+    myStatWriteFile << "\n";
     myStatWriteFile << ui.inventory[1];
+    myStatWriteFile << "\n";
     myStatWriteFile << ui.inventory[2];
+    myStatWriteFile << "\n";
     
     myStatWriteFile.close();
     
@@ -269,7 +284,7 @@ int main() {
     
     //Score Objects:
     
-    int coins = 0;
+    //int coins = 0;
     
     
     
@@ -278,7 +293,7 @@ int main() {
     
     ui.initUI(arial,coinTexWithoutBG,heart1Tex);
     
-    loadPlayerStats(ui);
+    loadPlayerStats(ui,player);
     //lblScore.setString(ssScore.str());
     
     //Gravity Variables:
@@ -306,8 +321,14 @@ int main() {
     
     particles.setEmitter({-1000,-1000});
     
+    ui.updateStats();
+    ui.updateCoinLabel();
+    
     //Main Loop:
     while (window.isOpen()) {
+        
+        ui.updateStats();
+        //ui.updateCoinLabel();
         
         sf::Time elapsed = clock.restart(); // particle related
         particles.update(elapsed); // particle related
@@ -551,7 +572,7 @@ int main() {
         //lblScore.setString("0");
         //lblScore.setString(std::to_string(coins));
         //ui.updateCoinLabel();
-        ui.coins = coins;
+        //ui.coins = coins;
         
         //bounds logic
         if(player.getY() < 59){
@@ -619,10 +640,12 @@ int main() {
                         
                         if(itmVec[i] == 1){
                             std::cout<<"\nDEBUG: COIN COLLECTED\n";
-                            coins++;
+                            
+                            ui.coins++;
+                            //ui.updateStats();
                             //lblScore.setString(std::to_string(coins));
-                            ui.updateCoinLabel();
-                            ui.coins = coins;
+                            //ui.updateCoinLabel();
+                            //ui.coins = coins;
                             
                             //std::cout<<"\nui.coins:"<<ui.coins;
                             
@@ -678,8 +701,12 @@ int main() {
                         itmVec[i] = 0;
                         shouldUpdateItems = 1;
                         
+                        if(autosave == 1){
+                            
                         saveFile(fileLoadValue);
-                        savePlayerStats(ui);
+                        savePlayerStats(ui,player);
+                            
+                        }
                         
                         //lblScore.setString("COLLIDING");
                         //std::cout<<"COLLIDING";
@@ -694,9 +721,23 @@ int main() {
                 }
             }
             
-            
-            
         //end item collision logic
+            
+        //player update item logic
+            
+            if(player.shouldUpdateItem == 1){
+                
+                if(player.activeItem == 2){
+                    player.activeItemSprite.setTexture(knifeTex);
+                } else if(player.activeItem == 5){
+                    player.activeItemSprite.setTexture(jackOLanternTex);
+                }
+                
+                player.shouldUpdateItem = 0;
+                
+            }
+            
+        //end player update item logic
         
         
         //door logic
