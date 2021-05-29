@@ -26,13 +26,13 @@
 #include "player.cpp"
 #include "map.cpp"
 #include "particleTest.cpp"
+#include "topMenu.cpp"
 //#include "itemGrid.cpp"
 
 #include <fstream>
 
 
 int itmVec[256];
-
 
 int main() {
     sf::RenderWindow window;
@@ -77,6 +77,12 @@ int main() {
     
     itemGrid itemgrid;
     Map map;
+    UI ui;
+    
+    sf::Font arial;
+    if(!arial.loadFromFile("sansation.ttf")){
+        return EXIT_FAILURE;
+    }
     
     sf::Texture playerTexture;
     if (!playerTexture.loadFromFile("penguin.png")) {
@@ -96,6 +102,16 @@ int main() {
     
     sf::Texture coinTex;
     if (!coinTex.loadFromFile("coin1andbg.png")) {
+        return EXIT_FAILURE;
+    }
+    
+    sf::Texture jackOLanternTex;
+    if (!jackOLanternTex.loadFromFile("jackolantern.png")) {
+        return EXIT_FAILURE;
+    }
+    
+    sf::Texture jackOLanternAndBGTex;
+    if (!jackOLanternAndBGTex.loadFromFile("jackolanternandbg.png")) {
         return EXIT_FAILURE;
     }
     
@@ -193,17 +209,12 @@ int main() {
     
     int coins = 0;
     
-    sf::Font arial;
-    arial.loadFromFile("sansation.ttf");
+    
     
     //std::ostringstream ssScore;
     //ssScore << "Score: " << coins;
     
-    sf::Text lblScore;
-    lblScore.setCharacterSize(30);
-    lblScore.setPosition({ 10, 10 });
-    lblScore.setFont(arial);
-    lblScore.setString("0");
+    ui.initUI(arial,coinTex);
     //lblScore.setString(ssScore.str());
     
     //Gravity Variables:
@@ -348,6 +359,8 @@ int main() {
                         itemgrid.sprites[bb][aa].setTexture(candy1Tex);
                     } else if(itmVec[jj] == 4){
                         itemgrid.sprites[bb][aa].setTexture(candy2Tex);
+                    } else if(itmVec[jj] == 5){
+                        itemgrid.sprites[bb][aa].setTexture(jackOLanternAndBGTex);
                     }
                     //std::cout<<itmVec[jj]<<" ";
                     
@@ -381,6 +394,8 @@ int main() {
                         itemgrid.sprites[bb][aa].setTexture(candy1Tex);
                     } else if(itmVec[jj] == 4){
                         itemgrid.sprites[bb][aa].setTexture(candy2Tex);
+                    } else if(itmVec[jj] == 5){
+                        itemgrid.sprites[bb][aa].setTexture(jackOLanternAndBGTex);
                     }
                     //std::cout<<itmVec[jj]<<" ";
                     
@@ -470,7 +485,9 @@ int main() {
         
         if(windowFocusLost == 0){
         //lblScore.setString("0");
-        lblScore.setString(std::to_string(coins));
+        //lblScore.setString(std::to_string(coins));
+        //ui.updateCoinLabel();
+        ui.coins = coins;
         
         //bounds logic
         if(player.getY() < 59){
@@ -539,7 +556,12 @@ int main() {
                         if(itmVec[i] == 1){
                             std::cout<<"\nDEBUG: COIN COLLECTED\n";
                             coins++;
-                            lblScore.setString(std::to_string(coins));
+                            //lblScore.setString(std::to_string(coins));
+                            ui.updateCoinLabel();
+                            ui.coins = coins;
+                            
+                            //std::cout<<"\nui.coins:"<<ui.coins;
+                            
                             coinPickupSfx.stop();
                             coinPickupSfx.play();
                         }
@@ -574,6 +596,17 @@ int main() {
                             
                         }
                         
+                        if(itmVec[i] == 5){
+                            
+                            std::cout<<"\nDEBUG: JACK O LANTERN COLLECTED";
+                            itemPickupSfx.stop();
+                            itemPickupSfx.play();
+                            
+                            player.activeItem = 5;
+                            player.activeItemSprite.setTexture(jackOLanternTex);
+                            
+                        }
+                        
                         
                         itmVec[i] = 0;
                         shouldUpdateItems = 1;
@@ -604,7 +637,7 @@ int main() {
         }*/
         
         //Coin Logic:
-        for (int i = 0; i < coinVec.size(); i++) {
+        /*for (int i = 0; i < coinVec.size(); i++) {
             if (player.isCollidingWithCoin(coinVec[i])) {
                 
                 
@@ -613,11 +646,12 @@ int main() {
                 
                 coinVec[i]->setPos({ 422234, 423432 });
                 coins++;
-                lblScore.setString(std::to_string(coins));
+                //lblScore.setString(std::to_string(coins));
+                ui.updateCoinLabel();
                 std::cout<<"coins:"<<coins<<"\n";
             }
             
-        }
+        }*/
         
         //door logic
         
@@ -681,7 +715,7 @@ int main() {
         }
             
         } else {
-            lblScore.setString("GAME PAUSED, SPACE TO RESUME");
+            //lblScore.setString("GAME PAUSED, SPACE TO RESUME");
         }//window focus lost
         
         //end door logica
@@ -689,7 +723,7 @@ int main() {
         window.clear();
         map.drawTo(window);
         //coin1.drawTo(window);
-        window.draw(lblScore);
+        //window.draw(lblScore);
         
         //coin2.drawTo(window);
         
@@ -705,6 +739,8 @@ int main() {
         door2.drawTo(window);
         door3.drawTo(window);
         door4.drawTo(window);
+        
+        ui.drawTo(window);
         
         window.display();
     }
