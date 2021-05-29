@@ -39,7 +39,7 @@ public:
     float damage = 0.0;
     float health = 3.0;
     
-    int activeItem = 1; //1-3
+    int activeItemSlot = 1; //1-3
     
     float movementSpeed = 0.5;
     
@@ -48,8 +48,8 @@ public:
     void initUI(sf::Font &arial,sf::Texture &coinTexture,sf::Texture &heartTexture){
         
         inventory[0] = 0;
-        inventory[1] = 1;
-        inventory[2] = 2;
+        inventory[1] = 0;
+        inventory[2] = 0;
         
         sf::Color color1;
         sf::Color color2;
@@ -73,6 +73,8 @@ public:
         itmSlBg1.setFillColor(color2);
         itmSlBg1.setSize({40,40});
         itmSlBg1.setPosition({750,10});
+        itmSlSp1.setPosition({750,10});
+        itmSlSp1.scale({2.7,2.6});
         
         itmSlFg1.setFillColor(color3);
         itmSlFg1.setSize({34,34});
@@ -81,6 +83,8 @@ public:
         itmSlBg2.setFillColor(color2);
         itmSlBg2.setSize({40,40});
         itmSlBg2.setPosition({800,10});
+        itmSlSp2.setPosition({800,10});
+        itmSlSp2.scale({2.7,2.6});
         
         itmSlFg2.setFillColor(color3);
         itmSlFg2.setSize({34,34});
@@ -89,6 +93,8 @@ public:
         itmSlBg3.setFillColor(color2);
         itmSlBg3.setSize({40,40});
         itmSlBg3.setPosition({850,10});
+        itmSlSp3.setPosition({850,10});
+        itmSlSp3.scale({2.7,2.6});
         
         itmSlFg3.setFillColor(color3);
         itmSlFg3.setSize({34,34});
@@ -157,7 +163,7 @@ public:
         color2.g = 64;
         color2.a = 255;
         
-        if(activeItem == 1){
+        if(activeItemSlot == 1){
             itmSlBg1.setFillColor(color2);
             itmSlFg1.setFillColor(color3);
             itmSlBg2.setFillColor(color3);
@@ -165,7 +171,7 @@ public:
             itmSlBg3.setFillColor(color3);
             itmSlFg3.setFillColor(color2);
             
-        } else if (activeItem == 2){
+        } else if (activeItemSlot == 2){
             itmSlBg1.setFillColor(color3);
             itmSlFg1.setFillColor(color2);
             itmSlBg2.setFillColor(color2);
@@ -173,7 +179,7 @@ public:
             itmSlBg3.setFillColor(color3);
             itmSlFg3.setFillColor(color2);
             
-        } else if (activeItem == 3){
+        } else if (activeItemSlot == 3){
             itmSlBg1.setFillColor(color3);
             itmSlFg1.setFillColor(color2);
             itmSlBg2.setFillColor(color3);
@@ -199,6 +205,10 @@ public:
         window.draw(itmSlFg2);
         window.draw(itmSlBg3);
         window.draw(itmSlFg3);
+        
+        window.draw(itmSlSp1);
+        window.draw(itmSlSp2);
+        window.draw(itmSlSp3);
         //window.draw(lblHP);
         //window.draw(lblspd);
         

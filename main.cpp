@@ -327,7 +327,25 @@ int main() {
     //Main Loop:
     while (window.isOpen()) {
         
-        player.activeItem = ui.activeItem;
+        if(ui.activeItemSlot == 1){
+            if(player.activeItem != ui.inventory[0])
+                player.shouldUpdateItem = 1;
+                
+            player.activeItem = ui.inventory[0];
+            
+        } else if(ui.activeItemSlot == 2){
+            if(player.activeItem != ui.inventory[1])
+                player.shouldUpdateItem = 1;
+            
+            player.activeItem = ui.inventory[1];
+            
+        } else if(ui.activeItemSlot ==3){
+            if(player.activeItem != ui.inventory[2])
+                player.shouldUpdateItem = 1;
+            
+            player.activeItem = ui.inventory[2];
+            
+        }
         
         ui.updateStats();
         //ui.updateCoinLabel();
@@ -552,13 +570,13 @@ int main() {
         } else {goingLeft = 0;}
         
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z)) {
-            ui.activeItem = 1;
+            ui.activeItemSlot = 1;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::X)) {
-            ui.activeItem = 2;
+            ui.activeItemSlot = 2;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::C)) {
-            ui.activeItem = 3;
+            ui.activeItemSlot = 3;
         }
         
         //Event Loop:
@@ -673,8 +691,21 @@ int main() {
                             
                             ui.damage = 1;
                             
-                            player.activeItem = 2;
-                            player.activeItemSprite.setTexture(knifeTex);
+                            if(ui.activeItemSlot == 1){
+                                ui.inventory[0] = 2;
+                                ui.itmSlSp1.setTexture(knifeTex);
+                            } else if(ui.activeItemSlot == 2){
+                                ui.inventory[1] = 2;
+                                ui.itmSlSp2.setTexture(knifeTex);
+                            } else if(ui.activeItemSlot == 3){
+                                ui.inventory[2] = 2;
+                                ui.itmSlSp3.setTexture(knifeTex);
+                            }
+                            
+                            //player.activeItem = 2;
+                            //player.activeItemSprite.setTexture(knifeTex);
+                            
+                            //if(ui.activeItemSlot)
                             
                             
                         }
@@ -704,8 +735,20 @@ int main() {
                             itemPickupSfx.stop();
                             itemPickupSfx.play();
                             
-                            player.activeItem = 5;
-                            player.activeItemSprite.setTexture(jackOLanternTex);
+                            if(ui.activeItemSlot == 1){
+                                ui.inventory[0] = 5;
+                                ui.itmSlSp1.setTexture(jackOLanternTex);
+                            } else if(ui.activeItemSlot == 2){
+                                ui.inventory[1] = 5;
+                                ui.itmSlSp2.setTexture(jackOLanternTex);
+                            } else if(ui.activeItemSlot == 3){
+                                ui.inventory[2] = 5;
+                                ui.itmSlSp3.setTexture(jackOLanternTex);
+                            }
+                            
+                            //player.activeItem = 5;
+                            //player.activeItemSprite.setTexture(jackOLanternTex);
+                            
                             
                         }
                         
@@ -743,7 +786,11 @@ int main() {
                     player.activeItemSprite.setTexture(knifeTex);
                 } else if(player.activeItem == 5){
                     player.activeItemSprite.setTexture(jackOLanternTex);
+                } else if(player.activeItem == 0){
+                    player.activeItemSprite.setTexture(emptyTex);
                 }
+                
+                std::cout<<"\nplayer active item:"<<player.activeItem<<"\n";
                 
                 player.shouldUpdateItem = 0;
                 
