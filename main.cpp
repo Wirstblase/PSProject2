@@ -28,6 +28,7 @@
 #include "enemy.cpp"
 #include "map.cpp"
 #include "particleTest.cpp"
+#include "topMenu.cpp"
 //#include "itemGrid.cpp"
 
 #include <fstream>
@@ -35,71 +36,71 @@
 
 int itmVec[256];
 
-void drawLine(sf::RenderWindow &window, int x1, int y1, int x2, int y2, sf::Color color) {
-    sf::Vertex line[] = {
-            sf::Vertex(sf::Vector2f(x1, y1), color),
-            sf::Vertex(sf::Vector2f(x2, y2), color)
-    };
-    window.draw(line, 2, sf::Lines);
+int autosave = 0;
+
+void loadPlayerStats(UI &ui, Player &player){
+    std::ifstream MyStatReadFile("playerstats.txt");
+    
+    MyStatReadFile >> ui.coins;
+    MyStatReadFile >> ui.damage;
+    MyStatReadFile >> ui.health;
+    MyStatReadFile >> ui.movementSpeed;
+    MyStatReadFile >> ui.inventory[0];
+    MyStatReadFile >> ui.inventory[1];
+    MyStatReadFile >> ui.inventory[2];
+    
+    player.activeItem = ui.inventory[0];
+    player.shouldUpdateItem = 1;
+    
+    //ui.updateStats();
+    //ui.updateCoinLabel();
+    
+    MyStatReadFile.close();
+    
 }
 
-
-float distance(int x1, int y1, int x2, int y2) {
-    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2) * 1.0);
+void savePlayerStats(UI &ui, Player &player){
+    
+    std::ofstream myStatWriteFile("playerstats.txt");
+    
+    myStatWriteFile << ui.coins;
+    myStatWriteFile << "\n";
+    myStatWriteFile << ui.damage;
+    myStatWriteFile << "\n";
+    myStatWriteFile << ui.health;
+    myStatWriteFile << "\n";
+    myStatWriteFile << ui.movementSpeed;
+    myStatWriteFile << "\n";
+    myStatWriteFile << ui.inventory[0];
+    myStatWriteFile << "\n";
+    myStatWriteFile << ui.inventory[1];
+    myStatWriteFile << "\n";
+    myStatWriteFile << ui.inventory[2];
+    myStatWriteFile << "\n";
+    
+    myStatWriteFile.close();
+    
 }
 
-int main2() {
-    sf::RenderWindow window;
-    sf::Vector2i centerWindow((sf::VideoMode::getDesktopMode().width / 2) - 445,
-                              (sf::VideoMode::getDesktopMode().height / 2) - 480);
-    window.create(sf::VideoMode(900, 900), "gametest1",
-                  sf::Style::Titlebar | sf::Style::Close /*sf::Style::Fullscreen*/);
-    window.setPosition(centerWindow);
-
-    sf::Vector2i player({450, 450});
-    sf::Vector2i target({650, 650});
-
-    while (window.isOpen()) {
-        //Event Loop:
-        sf::Event Event;
-        while (window.pollEvent(Event)) {
-            switch (Event.type) {
-                case sf::Event::Closed:
-                    window.close();
-            }
-        }
-
-        window.clear(sf::Color(10, 10, 10));
-
-        drawLine(window, target.x, player.y, target.x, target.y, sf::Color(255, 255, 255));
-        drawLine(window, player.x, player.y, target.x, target.y, sf::Color(255, 255, 255));
-        drawLine(window, player.x, player.y, target.x, player.y, sf::Color(255, 255, 255));
-
-        double PI = M_PI;
-        int ATTACK_SPEED = 20;
-
-        float b = distance(player.x, player.y, target.x, target.y);
-        float c = distance(player.x, player.y, target.x, player.y);
-
-        float angle = acos(c / b);
-
-        if (player.x > target.x && player.y > target.y) {
-            angle += PI;
-        } else if (player.x < target.x && player.y > target.y) {
-            angle += PI / 2 + PI;
-        } else if (player.x > target.x && player.y < target.y) {
-            angle += PI / 2;
-        } else if (player.x < target.x && player.y < target.y) {
-
-        }
-
-        int newX = (int) (cos(angle) * ATTACK_SPEED);
-        int newY = (int) (sin(angle) * ATTACK_SPEED);
-
-        drawLine(window, player.x, player.y, player.x + newX, player.y + newY, sf::Color(90, 90, 90));
-
-        window.display();
+void saveFile(int fileLoadValue){
+    
+    char loadItemFile[20];
+    snprintf(loadItemFile, 10, "itm%d.txt", fileLoadValue);
+    
+    std::ofstream MyItemWriteFile(loadItemFile);
+    
+    for (int i=0;i<=255;i++)
+    {
+        char thing[10];
+        snprintf(thing, 10, "%d" ,itmVec[i]);
+        MyItemWriteFile << thing;
+        MyItemWriteFile << " ";
+        if(i%16 == 0)
+        MyItemWriteFile << "\n";
     }
+    
+    MyItemWriteFile.close();
+    
 }
 
 
@@ -149,6 +150,13 @@ int main() {
     itemGrid itemgrid;
     Map map;
 
+    UI ui;
+    
+    sf::Font arial;
+    if(!arial.loadFromFile("sansation.ttf")){
+        return EXIT_FAILURE;
+    }
+    
     sf::Texture playerTexture;
     if (!playerTexture.loadFromFile("penguin.png")) {
         return EXIT_FAILURE;
@@ -170,12 +178,32 @@ int main() {
     if (!doorHaloTexture.loadFromFile("doorhalo.png")) {
         return EXIT_FAILURE;
     }
-
+    
+    sf::Texture heart1Tex;
+    if (!heart1Tex.loadFromFile("heart1.png")) {
+        return EXIT_FAILURE;
+    }
+    
     sf::Texture coinTex;
     if (!coinTex.loadFromFile("coin1andbg.png")) {
         return EXIT_FAILURE;
     }
-
+    
+    sf::Texture coinTexWithoutBG;
+    if (!coinTexWithoutBG.loadFromFile("coin1.png")) {
+        return EXIT_FAILURE;
+    }
+    
+    sf::Texture jackOLanternTex;
+    if (!jackOLanternTex.loadFromFile("jackolantern.png")) {
+        return EXIT_FAILURE;
+    }
+    
+    sf::Texture jackOLanternAndBGTex;
+    if (!jackOLanternAndBGTex.loadFromFile("jackolanternandbg.png")) {
+        return EXIT_FAILURE;
+    }
+    
     sf::Texture knifeTex;
     if (!knifeTex.loadFromFile("knife1andbg.png")) {
         return EXIT_FAILURE;
@@ -208,6 +236,43 @@ int main() {
     if (!groundTexture2.loadFromFile("pixeltile2.png")) {
         return EXIT_FAILURE;
     } else std::cout << "ground texture 2 loaded\n";
+
+    
+    
+    sf::Texture marbleTexture1;
+    sf::Texture plankTexture1;
+    sf::Texture caveBlockTex1;
+    sf::Texture grassTex1;
+    sf::Texture groundTexture1Rocks;
+    sf::Texture waterCorner1;
+    sf::Texture waterCorner2;
+    sf::Texture waterCorner3;
+    sf::Texture waterCorner4;
+    sf::Texture waterBlock1;
+    sf::Texture cobble1;
+    sf::Texture waterTop1;
+    sf::Texture waterBottom1;
+    sf::Texture waterLeft1;
+    sf::Texture waterRight1;
+    sf::Texture brickBlock1;
+    
+    if(!brickBlock1.loadFromFile("brick1.png")) {return EXIT_FAILURE;}
+    
+    if(!marbleTexture1.loadFromFile("marble1.png")) {return EXIT_FAILURE;}
+    if(!plankTexture1.loadFromFile("plank1.png")) {return EXIT_FAILURE;}
+    if(!caveBlockTex1.loadFromFile("caveblock1.png")) {return EXIT_FAILURE;}
+    if(!grassTex1.loadFromFile("grass1.png")) {return EXIT_FAILURE;}
+    if(!groundTexture1Rocks.loadFromFile("pixeltile1withrocks.png")) {return EXIT_FAILURE;}
+    if(!waterCorner1.loadFromFile("watercorner1.png")) {return EXIT_FAILURE;}
+    if(!waterCorner2.loadFromFile("watercorner2.png")) {return EXIT_FAILURE;}
+    if(!waterCorner3.loadFromFile("watercorner3.png")) {return EXIT_FAILURE;}
+    if(!waterCorner4.loadFromFile("watercorner4.png")) {return EXIT_FAILURE;}
+    if(!waterBlock1.loadFromFile("waterblock1.png")) {return EXIT_FAILURE;}
+    if(!cobble1.loadFromFile("cobblestone1.png")) {return EXIT_FAILURE;}
+    if(!waterTop1.loadFromFile("watertop1.png")) {return EXIT_FAILURE;}
+    if(!waterBottom1.loadFromFile("waterbottom1.png")) {return EXIT_FAILURE;}
+    if(!waterLeft1.loadFromFile("waterleft1.png")) {return EXIT_FAILURE;}
+    if(!waterRight1.loadFromFile("waterright1.png")) {return EXIT_FAILURE;}
 
     //std::string myText;
 
@@ -280,29 +345,25 @@ int main() {
     coin2.setPos({ 750, 600 });*/
 
     //Score Objects:
-
-    int coins = 0;
-
-    sf::Font arial;
-    arial.loadFromFile("sansation.ttf");
-
+    
+    //int coins = 0;
+    
+    
+    
     //std::ostringstream ssScore;
     //ssScore << "Score: " << coins;
-
-    sf::Text lblScore;
-    lblScore.setCharacterSize(30);
-    lblScore.setPosition({10, 10});
-    lblScore.setFont(arial);
-    lblScore.setString("0");
+    
+    ui.initUI(arial,coinTexWithoutBG,heart1Tex);
+    
+    loadPlayerStats(ui,player);
     //lblScore.setString(ssScore.str());
 
     //Gravity Variables:
     const int groundHeight = 700;
     const float gravitySpeed = 0.3;
     bool isJumping = false;
-
-    float moveSpeed = 0.5;
-
+    //float moveSpeed = 0.5;
+    
     int goingLeft = 0;
     int goingRight = 0;
     int goingUp = 0;
@@ -317,13 +378,40 @@ int main() {
     ParticleSystem particles(100); // particle related
     sf::Clock clock; // particle related
 
-
-
-    particles.setEmitter({-1000, -1000});
-
+    
+    
+    
+    particles.setEmitter({-1000,-1000});
+    
+    ui.updateStats();
+    ui.updateCoinLabel();
+    
     //Main Loop:
     while (window.isOpen()) {
-
+        
+        if(ui.activeItemSlot == 1){
+            if(player.activeItem != ui.inventory[0])
+                player.shouldUpdateItem = 1;
+                
+            player.activeItem = ui.inventory[0];
+            
+        } else if(ui.activeItemSlot == 2){
+            if(player.activeItem != ui.inventory[1])
+                player.shouldUpdateItem = 1;
+            
+            player.activeItem = ui.inventory[1];
+            
+        } else if(ui.activeItemSlot ==3){
+            if(player.activeItem != ui.inventory[2])
+                player.shouldUpdateItem = 1;
+            
+            player.activeItem = ui.inventory[2];
+            
+        }
+        
+        ui.updateStats();
+        //ui.updateCoinLabel();
+        
         sf::Time elapsed = clock.restart(); // particle related
         particles.update(elapsed); // particle related
 
@@ -371,28 +459,64 @@ int main() {
                 door4.doorHaloSprite.setTexture(doorHaloTexture);
             }
 
-            //end doors enabling or disabling logic
-            for (int i = 0; i <= 256; i++) {
-                MyReadFile >> texVec[i];
-                //std::cout << texVec[i] << " ";
-            }
-
-            int i = 0;
-            for (int aa = 0; aa < 16; aa++) {
-                for (int bb = 0; bb < 16; bb++) {
-
-                    if (texVec[i] == 0) {
-                        map.sprites[bb][aa].setTexture(emptyTex);
-                    } else if (texVec[i] == 1) {
-                        map.sprites[bb][aa].setTexture(groundTexture1);
-                    } else if (texVec[i] == 2) {
-                        map.sprites[bb][aa].setTexture(groundTexture2);
-                    } else if (texVec[i] == 3) {
-                        map.sprites[bb][aa].setTexture(solidBlockTexture1);
-                    }
-
-                    i++;
+            
+        //end doors enabling or disabling logic
+        for(int i=0;i<=256;i++){
+            MyReadFile >> texVec[i];
+            //std::cout << texVec[i] << " ";
+        }
+        
+        int i=0;
+        for(int aa=0;aa<16;aa++){
+            for(int bb=0;bb<16;bb++){
+                
+                if(texVec[i] == 0){
+                    map.sprites[bb][aa].setTexture(emptyTex);
+                } else if(texVec[i] == 1){
+                    map.sprites[bb][aa].setTexture(groundTexture1);
+                } else if(texVec[i] == 2){
+                    map.sprites[bb][aa].setTexture(groundTexture2);
+                } else if(texVec[i] == 3){
+                    map.sprites[bb][aa].setTexture(solidBlockTexture1);
+                } else if(texVec[i] == 4){
+                    map.sprites[bb][aa].setTexture(brickBlock1);
+                } else if(texVec[i] == 5){
+                    map.sprites[bb][aa].setTexture(marbleTexture1);
+                } else if(texVec[i] == 6){
+                    map.sprites[bb][aa].setTexture(plankTexture1);
+                } else if(texVec[i] == 7){
+                    map.sprites[bb][aa].setTexture(caveBlockTex1);
+                } else if(texVec[i] == 8){
+                    map.sprites[bb][aa].setTexture(grassTex1);
+                } else if(texVec[i] == 9){
+                map.sprites[bb][aa].setTexture(groundTexture1Rocks);
+                }   else if(texVec[i] == 10){
+                    map.sprites[bb][aa].setTexture(waterCorner1);
+                } else if(texVec[i] == 11){
+                    map.sprites[bb][aa].setTexture(waterCorner2);
+                } else if(texVec[i] == 12){
+                    map.sprites[bb][aa].setTexture(waterCorner3);
+                } else if(texVec[i] == 13){
+                    map.sprites[bb][aa].setTexture(waterCorner4);
+                } else if(texVec[i] == 14){
+                    map.sprites[bb][aa].setTexture(waterBlock1);
+                } else if(texVec[i] == 15){
+                    map.sprites[bb][aa].setTexture(waterTop1);
+                }else if(texVec[i] == 16){
+                    map.sprites[bb][aa].setTexture(waterBottom1);
+                }else if(texVec[i] == 17){
+                    map.sprites[bb][aa].setTexture(waterLeft1);
+                }else if(texVec[i] == 18){
+                    map.sprites[bb][aa].setTexture(waterRight1);
+                }else if(texVec[i] == 19){
+                    map.sprites[bb][aa].setTexture(cobble1);
                 }
+                
+                
+                else map.sprites[bb][aa].setTexture(emptyTex);
+                
+                i++;
+
             }
 
             MyReadFile.close();
@@ -432,6 +556,8 @@ int main() {
                         itemgrid.sprites[bb][aa].setTexture(candy1Tex);
                     } else if (itmVec[jj] == 4) {
                         itemgrid.sprites[bb][aa].setTexture(candy2Tex);
+                    } else if(itmVec[jj] == 5){
+                        itemgrid.sprites[bb][aa].setTexture(jackOLanternAndBGTex);
                     }
                     //std::cout<<itmVec[jj]<<" ";
 
@@ -465,6 +591,8 @@ int main() {
                         itemgrid.sprites[bb][aa].setTexture(candy1Tex);
                     } else if (itmVec[jj] == 4) {
                         itemgrid.sprites[bb][aa].setTexture(candy2Tex);
+                    } else if(itmVec[jj] == 5){
+                        itemgrid.sprites[bb][aa].setTexture(jackOLanternAndBGTex);
                     }
                     //std::cout<<itmVec[jj]<<" ";
 
@@ -491,29 +619,35 @@ int main() {
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
 
-            if (windowFocusLost == 0) {
-                player.move({0, -moveSpeed});
+            
+            if(windowFocusLost == 0){
+            player.move({ 0, -ui.movementSpeed });
+
                 isJumping = true;
                 goingUp = 1;
             }
         } else { goingUp = 0; }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
 
-            if (windowFocusLost == 0) {
-                player.move({0, moveSpeed});
+            
+            if(windowFocusLost == 0){
+                player.move({ 0, ui.movementSpeed });
+
                 goingDown = 1;
             }
             //isJumping = true;}
         } else { goingDown = 0; }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
 
-            if (windowFocusLost == 0) {
-                if (player.facing == 1) {
-                    player.playerSpriteScale({1.0, 1.0});
-                    player.playerSpriteOffset({-10, 0});
-                    player.facing = 0;
-                }
-                player.move({moveSpeed, 0});
+            
+            if(windowFocusLost == 0){
+            if(player.facing == 1){
+                player.playerSpriteScale({1.0,1.0});
+                player.playerSpriteOffset({-10,0});
+                player.facing = 0;
+            }
+                player.move({ ui.movementSpeed, 0 });
+
                 goingRight = 1;
             }
 
@@ -521,17 +655,28 @@ int main() {
         } else { goingRight = 0; }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
 
-            if (windowFocusLost == 0) {
-                if (player.facing == 0) {
-                    player.playerSpriteScale({-1.0, 1.0});
-                    player.playerSpriteOffset({50, 0});
-                    player.facing = 1;
-                }
-                player.move({-moveSpeed, 0});
+            
+            if(windowFocusLost == 0){
+            if(player.facing == 0){
+                player.playerSpriteScale({-1.0,1.0});
+                player.playerSpriteOffset({50,0});
+                player.facing = 1;
+            }
+                player.move({ -ui.movementSpeed, 0 });
                 goingLeft = 1;
             }
-
-        } else { goingLeft = 0; }
+            
+        } else {goingLeft = 0;}
+        
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z)) {
+            ui.activeItemSlot = 1;
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::X)) {
+            ui.activeItemSlot = 2;
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::C)) {
+            ui.activeItemSlot = 3;
+        }
 
         //Event Loop:
         while (window.pollEvent(Event)) {
@@ -552,50 +697,49 @@ int main() {
             }
         }
 
-        if (windowFocusLost == 0) {
-            //lblScore.setString("0");
-            lblScore.setString(std::to_string(coins));
+        
+        if(windowFocusLost == 0){
+        //lblScore.setString("0");
+        //lblScore.setString(std::to_string(coins));
+        //ui.updateCoinLabel();
+        //ui.coins = coins;
+        
+        //bounds logic
+        if(player.getY() < 59){
+            player.move({0, 1});
+        }
+        if(player.getX() < -1){
+            player.move({1,0});
+        }
+        if(player.getX() > 860){
+            player.move({-1,0});
+        }
+        if(player.getY() > 860){
+            player.move({0,-1});
+        }
+        //end bounds logic
+            
+        //more bounds logic
+            
+        int i=0;
+        for(int aa=0;aa<16;aa++){
+                for(int bb=0;bb<16;bb++){
+                  
+                    
+                if((texVec[i] == 0 || texVec[i] == 4) &&player.player.getGlobalBounds().intersects(map.collRect[bb][aa].getGlobalBounds())){
+                    
+                    if(goingLeft == 1){
+                        player.move({1,0});
+                    }
+                    if(goingRight == 1){
+                        player.move({-1,0});
+                    }
+                    if(goingUp == 1){
+                        player.move({0,1});
+                    }
+                    if(goingDown == 1){
+                        player.move({0,-1});
 
-            //bounds logic
-            if (player.getY() < 59) {
-                player.move({0, 1});
-            }
-            if (player.getX() < -1) {
-                player.move({1, 0});
-            }
-            if (player.getX() > 860) {
-                player.move({-1, 0});
-            }
-            if (player.getY() > 860) {
-                player.move({0, -1});
-            }
-            //end bounds logic
-
-            //more bounds logic
-
-            int i = 0;
-            for (int aa = 0; aa < 16; aa++) {
-                for (int bb = 0; bb < 16; bb++) {
-
-
-                    if ((texVec[i] == 0 || texVec[i] == 4) &&
-                        player.player.getGlobalBounds().intersects(map.collRect[bb][aa].getGlobalBounds())) {
-
-                        if (goingLeft == 1) {
-                            player.move({1, 0});
-                        }
-                        if (goingRight == 1) {
-                            player.move({-1, 0});
-                        }
-                        if (goingUp == 1) {
-                            player.move({0, 1});
-                        }
-                        if (goingDown == 1) {
-                            player.move({0, -1});
-                        }
-
-                        //lblScore.setString("COLLIDING");
-                        //std::cout<<"COLLIDING";
                     }
 
                     //if ()
@@ -622,10 +766,18 @@ int main() {
 
                         //std::cout<<"COLLIDING!";
 
-                        if (itmVec[i] == 1) {
-                            std::cout << "\nDEBUG: COIN COLLECTED\n";
-                            coins++;
-                            lblScore.setString(std::to_string(coins));
+                        
+                        if(itmVec[i] == 1){
+                            std::cout<<"\nDEBUG: COIN COLLECTED\n";
+                            
+                            ui.coins++;
+                            //ui.updateStats();
+                            //lblScore.setString(std::to_string(coins));
+                            //ui.updateCoinLabel();
+                            //ui.coins = coins;
+                            
+                            //std::cout<<"\nui.coins:"<<ui.coins;
+
                             coinPickupSfx.stop();
                             coinPickupSfx.play();
                         }
@@ -635,9 +787,25 @@ int main() {
                             std::cout << "\nDEBUG: KNIFE COLLECTED\n";
                             itemPickupSfx.stop();
                             itemPickupSfx.play();
-
-                            player.activeItem = 2;
-                            player.activeItemSprite.setTexture(knifeTex);
+                            
+                            ui.damage = 1;
+                            
+                            if(ui.activeItemSlot == 1){
+                                ui.inventory[0] = 2;
+                                ui.itmSlSp1.setTexture(knifeTex);
+                            } else if(ui.activeItemSlot == 2){
+                                ui.inventory[1] = 2;
+                                ui.itmSlSp2.setTexture(knifeTex);
+                            } else if(ui.activeItemSlot == 3){
+                                ui.inventory[2] = 2;
+                                ui.itmSlSp3.setTexture(knifeTex);
+                            }
+                            
+                            //player.activeItem = 2;
+                            //player.activeItemSprite.setTexture(knifeTex);
+                            
+                            //if(ui.activeItemSlot)
+                            
 
                         }
 
@@ -646,8 +814,10 @@ int main() {
                             std::cout << "\nDEBUG: BLUE CANDY COLLECTED";
                             itemPickupSfx.stop();
                             itemPickupSfx.play();
-                            moveSpeed = moveSpeed + 0.1;
-                            std::cout << moveSpeed;
+
+                            ui.movementSpeed = ui.movementSpeed + 0.05;
+                            std::cout<<ui.movementSpeed;
+
                         }
 
                         if (itmVec[i] == 4) {
@@ -655,14 +825,47 @@ int main() {
                             std::cout << "\nDEBUG: RED CANDY COLLECTED";
                             itemPickupSfx.stop();
                             itemPickupSfx.play();
-                            moveSpeed = moveSpeed - 0.1;
-                            std::cout << moveSpeed;
+
+                            ui.movementSpeed = ui.movementSpeed - 0.05;
+                            std::cout<<ui.movementSpeed;
+                            
+                        }
+                        
+                        if(itmVec[i] == 5){
+                            
+                            std::cout<<"\nDEBUG: JACK O LANTERN COLLECTED";
+                            itemPickupSfx.stop();
+                            itemPickupSfx.play();
+                            
+                            if(ui.activeItemSlot == 1){
+                                ui.inventory[0] = 5;
+                                ui.itmSlSp1.setTexture(jackOLanternTex);
+                            } else if(ui.activeItemSlot == 2){
+                                ui.inventory[1] = 5;
+                                ui.itmSlSp2.setTexture(jackOLanternTex);
+                            } else if(ui.activeItemSlot == 3){
+                                ui.inventory[2] = 5;
+                                ui.itmSlSp3.setTexture(jackOLanternTex);
+                            }
+                            
+                            //player.activeItem = 5;
+                            //player.activeItemSprite.setTexture(jackOLanternTex);
+                            
+                            
 
                         }
 
 
                         itmVec[i] = 0;
                         shouldUpdateItems = 1;
+                        
+                        if(autosave == 1){
+                            
+                        saveFile(fileLoadValue);
+                        savePlayerStats(ui,player);
+                            
+                        }
+                        
 
                         //lblScore.setString("COLLIDING");
                         //std::cout<<"COLLIDING";
@@ -677,81 +880,75 @@ int main() {
                 }
             }
 
-
-
-            //end item collision logic
-
-            //Gravity Logic:
-            /*if (player.getY() < groundHeight && isJumping == false) {
-                player.move({ 0, gravitySpeed });
-            }*/
-            /*if (player.getY() > 300 && isJumping == true) {
-                player.move({ 0, -gravitySpeed });
-            }*/
-
-            //Coin Logic:
-            for (int i = 0; i < coinVec.size(); i++) {
-                if (player.isCollidingWithCoin(coinVec[i])) {
-
-
-                    coinPickupSfx.stop();
-                    coinPickupSfx.play();
-
-                    coinVec[i]->setPos({422234, 423432});
-                    coins++;
-                    lblScore.setString(std::to_string(coins));
-                    std::cout << "coins:" << coins << "\n";
+            
+        //end item collision logic
+            
+        //player update item logic
+            
+            if(player.shouldUpdateItem == 1){
+                
+                if(player.activeItem == 2){
+                    player.activeItemSprite.setTexture(knifeTex);
+                } else if(player.activeItem == 5){
+                    player.activeItemSprite.setTexture(jackOLanternTex);
+                } else if(player.activeItem == 0){
+                    player.activeItemSprite.setTexture(emptyTex);
                 }
-
+                
+                std::cout<<"\nplayer active item:"<<player.activeItem<<"\n";
+                
+                player.shouldUpdateItem = 0;
+                
             }
+            
+        //end player update item logic
+        
+        
+        //door logic
+        
+        for (int i = 0; i < doorVec.size(); i++) {
+            if (player.isCollidingWithDoor(doorVec[i])) {
+                
+                //if(collideOnce == 0){
+                if(player.collideCooldown > 100){
+                    
+                    if(doorVec[i]->leadsTo != 99){
+                        fileLoadValue = doorVec[i]->leadsTo;
+                        shouldLoadLevel = 1;
+                        shouldLoadItems = 1;
+                        
+                        doorCloseSfx.stop();
+                        doorCloseSfx.play();
+                    }
+                    
+                    if(i == 0 && shouldLoadLevel == 1){
+                        player.setPos({800,400});
+                        
+                        player.playerSpriteOffset({50,0});
+                        player.playerSpriteScale({-1.0,1.0});
+                        
+                    } else if(i == 1 && shouldLoadLevel == 1){
+                        player.setPos({400,750});
+                        
+                        player.playerSpriteOffset({-10,0});
+                        player.playerSpriteScale({1.0,1.0});
+                        
+                        
+                    } else if(i == 2 && shouldLoadLevel == 1){
+                        player.setPos({5,450});
+                        
+                        player.playerSpriteOffset({-10,0});
+                        player.playerSpriteScale({1.0,1.0});
+                        
+                        
+                    } else if(i == 3 && shouldLoadLevel == 1){
+                        player.setPos({400,100});
+                        
+                        player.playerSpriteOffset({-10,0});
+                        player.playerSpriteScale({1.0,1.0});
+                        
+                        
 
-            //door logic
-
-            for (int i = 0; i < doorVec.size(); i++) {
-                if (player.isCollidingWithDoor(doorVec[i])) {
-
-                    //if(collideOnce == 0){
-                    if (player.collideCooldown > 100) {
-
-                        if (doorVec[i]->leadsTo != 99) {
-                            fileLoadValue = doorVec[i]->leadsTo;
-                            shouldLoadLevel = 1;
-                            shouldLoadItems = 1;
-
-                            doorCloseSfx.stop();
-                            doorCloseSfx.play();
-                        }
-
-                        if (i == 0 && shouldLoadLevel == 1) {
-                            player.setPos({800, 400});
-
-                            player.playerSpriteOffset({50, 0});
-                            player.playerSpriteScale({-1.0, 1.0});
-
-                        } else if (i == 1 && shouldLoadLevel == 1) {
-                            player.setPos({400, 750});
-
-                            player.playerSpriteOffset({-10, 0});
-                            player.playerSpriteScale({1.0, 1.0});
-
-
-                        } else if (i == 2 && shouldLoadLevel == 1) {
-                            player.setPos({5, 450});
-
-                            player.playerSpriteOffset({-10, 0});
-                            player.playerSpriteScale({1.0, 1.0});
-
-
-                        } else if (i == 3 && shouldLoadLevel == 1) {
-                            player.setPos({400, 100});
-
-                            player.playerSpriteOffset({-10, 0});
-                            player.playerSpriteScale({1.0, 1.0});
-
-
-                        }
-
-                        player.collideCooldown = 0;
                     }
                     //    collideOnce = 1;
                     //}
@@ -764,6 +961,10 @@ int main() {
                     //collideOnce = 0;
                 }
 
+                
+            } else if(player.isCollidingWithDoor(doorVec[i]) == false) {
+                //collideOnce = 0;
+
             }
 
 
@@ -773,7 +974,7 @@ int main() {
             }
 
         } else {
-            lblScore.setString("GAME PAUSED, SPACE TO RESUME");
+            //lblScore.setString("GAME PAUSED, SPACE TO RESUME");
         }//window focus lost
 
         //end door logica
@@ -781,8 +982,9 @@ int main() {
         window.clear();
         map.drawTo(window);
         //coin1.drawTo(window);
-        window.draw(lblScore);
 
+        //window.draw(lblScore);
+        
 
         //coin2.drawTo(window);
 
@@ -803,6 +1005,9 @@ int main() {
         door3.drawTo(window);
         door4.drawTo(window);
 
+        
+        ui.drawTo(window);
+        
         window.display();
     }
 }

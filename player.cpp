@@ -26,7 +26,9 @@ public:
     int facing = 0; //0-stanga, 1-drepta
     int collideCooldown = 0;
     sf::Sprite playerSprite;
-
+    
+    int shouldUpdateItem = 0;
+    
     Player(sf::Vector2f size) {
         player.setSize(size);
         player.setFillColor(sf::Color::Transparent);
