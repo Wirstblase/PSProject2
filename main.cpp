@@ -32,6 +32,140 @@
 #include <fstream>
 
 
+
+#include <cmath>
+
+class Enemy {
+public:
+    
+    sf::RectangleShape enemy;
+    
+    int facing = 0; //0-stanga, 1-drepta
+    sf::Sprite enemySprite;
+    
+    float WONDERING_SPEED = .2;
+    float ATTACK_SPEED = 0.5;
+    int ATTACK_IF_CLOSER_THAN = 100;
+    int LOSE_INTEREST_AT = 100;
+    bool target = false;
+    sf::Vector2f wonderTo = {-1, -1};
+    int first = 0;
+    
+    sf::Vector2f velocity = {0, 0};
+    sf::Vector2f acceleration = {0, 0};
+    
+    Enemy(sf::Vector2f size, sf::Texture &texture) { // Enemy(position)
+        enemy.setSize(size);
+        enemy.setFillColor(sf::Color::Transparent);
+        
+        enemySprite.setScale(sf::Vector2f(3.0f, 3.0f));
+        enemySprite.setTexture(texture);
+    }
+    
+    void destruct() {
+        
+    }
+    
+    void playerSpriteScale(sf::Vector2f scale) {
+        enemySprite.setScale(scale);
+    }
+    
+    void playerSpriteOffset(sf::Vector2f offset) {
+        sf::Vector2f pos = enemy.getPosition();
+        
+        enemySprite.setPosition(pos + offset);
+    }
+    
+    void drawTo(sf::RenderWindow &window) {
+        window.draw(enemy);
+        window.draw(enemySprite);
+    }
+    
+    void move(sf::Vector2f distance) {
+        enemy.move(distance);
+        enemySprite.move(distance);
+    }
+    
+    void setPos(sf::Vector2f newPos) {
+        enemy.setPosition(newPos);
+        enemySprite.setPosition(newPos /*- sf::Vector2f({35,22})*/); // spawning ghost with offset
+    }
+    
+    void testFor(Player &player) {
+        if (distance(player) < ATTACK_IF_CLOSER_THAN && distance(player) > 10) {
+            target = true;
+        } else if (target && (distance(player) > LOSE_INTEREST_AT || distance(player) < 10) ) {
+            target = false;
+        }
+        if (wonderTo.x < 0 || wonderTo.y < 0) {
+            wonderTo = getRandomLocation();
+        }
+        if (distance(wonderTo.x, wonderTo.y, getX(), getY()) < 10) {
+            wonderTo = getRandomLocation();
+        }
+        
+        update(player);
+    }
+    
+    void update(Player &player) {
+        sf::Vector2f dir;
+        if (target) {
+            dir = player.player.getPosition() - enemy.getPosition();
+        } else {
+            dir = wonderTo - enemy.getPosition();
+        }
+        
+        dir = normalize(dir) * 0.5f;
+        acceleration = dir;
+        velocity += acceleration;
+        velocity = limit(velocity, target ? ATTACK_SPEED : WONDERING_SPEED);
+        setPos(enemy.getPosition() + velocity);
+    }
+    
+    sf::Vector2f limit(sf::Vector2f &source, float max) {
+        float n = sqrt(source.x * source.x + source.y * source.y);
+        float f = std::min(n, max) / n;
+        return source * f;
+    }
+    
+    sf::Vector2f normalize(sf::Vector2f &source) {
+        float length = sqrt((source.x * source.x) + (source.y * source.y));
+        if (length != 0)
+            return sf::Vector2f(source.x / length, source.y / length);
+        else
+            return source;
+    }
+    
+    sf::Vector2f getRandomLocation() {
+        return {static_cast<float>(std::rand() % 900), static_cast<float>(std::rand() % 900)};
+    }
+    
+    float distance(int x1, int y1, int x2, int y2) {
+        return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2) * 1.0);
+    }
+    
+    float distance(Player player) {
+        return sqrt(pow(getX() - player.getX(), 2) + pow(getY() - player.getY(), 2) * 1.0);
+    }
+    
+    int getY() {
+        return enemy.getPosition().y;
+    }
+    
+    int getX() {
+        return enemy.getPosition().x;
+    }
+    
+    bool isCollidingPlayer(Player &player) {
+        if (enemy.getGlobalBounds().intersects(player.player.getGlobalBounds())) {
+            return true;
+        }
+        return false;
+    }
+};
+
+
+
 int itmVec[256];
 
 int autosave = 0;
@@ -129,7 +263,7 @@ int main() {
     
     // Play the music
     music.setLoop(true);
-    music.play();
+    //music.play();
     
     window.create(sf::VideoMode(900, 900), "gametest1", sf::Style::Titlebar | sf::Style::Close /*sf::Style::Fullscreen*/);
     window.setPosition(centerWindow);
@@ -156,7 +290,14 @@ int main() {
         return EXIT_FAILURE;
     }
     //const sf::Texture *playerTexture2;
+    
     player.playerSprite.setTexture(playerTexture);
+    
+    sf::Texture enemyTexture1;
+    if (!enemyTexture1.loadFromFile("ghost3.png")) return EXIT_FAILURE;
+    
+    sf::Texture enemyTexture2;
+    if (!enemyTexture2.loadFromFile("ghost4.png")) return EXIT_FAILURE;
     
     sf::Texture emptyTex;
     if (!emptyTex.loadFromFile("emptyTex.png")) {
@@ -262,6 +403,18 @@ int main() {
     if(!waterRight1.loadFromFile("waterright1.png")) {return EXIT_FAILURE;}
     //std::string myText;
     
+    // Enemy init
+    std::vector <Enemy> enemies;
+    srand(time(0));
+    int ENEMIES = 5;
+    for (int i = 0; i < ENEMIES; ++i) {
+        Enemy enemy({40, 90}, std::rand() % 2 == 1 ? enemyTexture1 : enemyTexture2);
+        int x = 425 + (std::rand() % 250) * (std::rand() % 2 == 0 ? -1 : 1);
+        int y = 400 + (std::rand() % 250) * (std::rand() % 2 == 0 ? -1 : 1);
+        enemy.setPos({static_cast<float>(x), static_cast<float>(y)});
+        enemies.push_back(enemy);
+        //        enemy.playerSpriteOffset({-10, 0});
+    }
     
     //Door objects
     
@@ -930,6 +1083,10 @@ int main() {
         
         //end door logica
         
+        for (auto enemy = enemies.begin(); enemy != enemies.end(); ++enemy) {
+            enemy->testFor(player);
+        }
+        
         window.clear();
         map.drawTo(window);
         //coin1.drawTo(window);
@@ -942,6 +1099,10 @@ int main() {
         window.draw(particles);
         
         player.drawTo(window);
+        
+        for (auto enemy = enemies.begin(); enemy != enemies.end(); ++enemy) {
+            enemy->drawTo(window);
+        }
         
         itemgrid.drawTo(window);
         
