@@ -1,20 +1,4 @@
 
-//
-// Disclaimer (only if you wanna compile this in xcode):
-// ----------
-//
-// This code will work only if you selected window, graphics and audio.
-//
-// In order to load the resources like cute_image.png, you have to set up
-// your target scheme:
-//
-// - Select "Edit Scheme…" in the "Product" menu;
-// - Check the box "use custom working directory";
-// - Fill the text field with the folder path containing your resources;
-//        (e.g. your project folder)
-// - Click OK.
-//
-
 #include <iostream>
 #include <cstdlib>
 #include <string.h>
@@ -47,7 +31,12 @@ public:
     float ATTACK_SPEED = 0.5;
     int ATTACK_IF_CLOSER_THAN = 100;
     int LOSE_INTEREST_AT = 100;
+    
+    int DAMAGE_AT = 10;
     bool target = false;
+    float DAMAGE = .5f;
+    float hasAttacked = false;
+    
     sf::Vector2f wonderTo = {-1, -1};
     int first = 0;
     
@@ -62,9 +51,14 @@ public:
         enemySprite.setTexture(texture);
     }
     
-    void destruct() {
+    /*~Enemy(){
         
     }
+    
+    void destruct() {
+        delete[] this -> enemy;
+        
+    }*/
     
     void playerSpriteScale(sf::Vector2f scale) {
         enemySprite.setScale(scale);
@@ -91,12 +85,26 @@ public:
         enemySprite.setPosition(newPos /*- sf::Vector2f({35,22})*/); // spawning ghost with offset
     }
     
-    void testFor(Player &player) {
+    void testFor(UI& ui, Player &player) {
+        //if (disabled) return;
         if (distance(player) < ATTACK_IF_CLOSER_THAN && distance(player) > 10) {
             target = true;
         } else if (target && (distance(player) > LOSE_INTEREST_AT || distance(player) < 10) ) {
             target = false;
         }
+        
+        if (distance(player) <= DAMAGE_AT && !hasAttacked){
+            ui.health -= DAMAGE;
+            target = false;
+            hasAttacked = true;
+            
+            // enable / disable based on ghost AI type -> comment the while for basic, uncomment for advanced
+            while (distance(wonderTo) < 100){
+                wonderTo = getRandomLocation();
+            }
+            //
+        }
+        
         if (wonderTo.x < 0 || wonderTo.y < 0) {
             wonderTo = getRandomLocation();
         }
@@ -109,7 +117,7 @@ public:
     
     void update(Player &player) {
         sf::Vector2f dir;
-        if (target) {
+        if (target && !hasAttacked) {
             dir = player.player.getPosition() - enemy.getPosition();
         } else {
             dir = wonderTo - enemy.getPosition();
@@ -137,6 +145,7 @@ public:
     }
     
     sf::Vector2f getRandomLocation() {
+        hasAttacked = false;
         return {static_cast<float>(std::rand() % 900), static_cast<float>(std::rand() % 900)};
     }
     
@@ -163,12 +172,12 @@ public:
         return false;
     }
 };
-
+int shouldSpawnGhosts = 0;
 
 
 int itmVec[256];
 
-int autosave = 0;
+int autosave = 1;
 
 void loadPlayerStats(UI &ui, Player &player){
     std::ifstream MyStatReadFile("playerstats.txt");
@@ -279,6 +288,12 @@ int main() {
     itemGrid itemgrid;
     Map map;
     UI ui;
+    
+    // Enemy init
+    std::vector <Enemy> enemies;
+    srand(time(0));
+    int ENEMIES = 5;
+    
     
     sf::Font arial;
     if(!arial.loadFromFile("sansation.ttf")){
@@ -403,18 +418,6 @@ int main() {
     if(!waterRight1.loadFromFile("waterright1.png")) {return EXIT_FAILURE;}
     //std::string myText;
     
-    // Enemy init
-    std::vector <Enemy> enemies;
-    srand(time(0));
-    int ENEMIES = 5;
-    for (int i = 0; i < ENEMIES; ++i) {
-        Enemy enemy({40, 90}, std::rand() % 2 == 1 ? enemyTexture1 : enemyTexture2);
-        int x = 425 + (std::rand() % 250) * (std::rand() % 2 == 0 ? -1 : 1);
-        int y = 400 + (std::rand() % 250) * (std::rand() % 2 == 0 ? -1 : 1);
-        enemy.setPos({static_cast<float>(x), static_cast<float>(y)});
-        enemies.push_back(enemy);
-        //        enemy.playerSpriteOffset({-10, 0});
-    }
     
     //Door objects
     
@@ -544,6 +547,9 @@ int main() {
         
         if(shouldLoadLevel == 1){  //LEVEL LOADER
         
+        std::cout<<"level loaded:"<<fileLoadValue<<"\n";
+            
+        
         
         char loadFile[20];
         snprintf(loadFile, 10, "%d.txt", fileLoadValue);
@@ -554,6 +560,22 @@ int main() {
         MyReadFile>>door2.leadsTo;
         MyReadFile>>door3.leadsTo;
         MyReadFile>>door4.leadsTo;
+            
+        MyReadFile>>shouldSpawnGhosts;
+            
+        enemies.clear();
+        //std::vector <Enemy> enemies;
+            
+            ENEMIES = shouldSpawnGhosts;
+            for (int i = 0; i < ENEMIES; ++i) {
+                Enemy enemy({40, 90}, std::rand() % 2 == 1 ? enemyTexture1 : enemyTexture2);
+                int x = 425 + (std::rand() % 250) * (std::rand() % 2 == 0 ? -1 : 1);
+                int y = 400 + (std::rand() % 250) * (std::rand() % 2 == 0 ? -1 : 1);
+                enemy.setPos({static_cast<float>(x), static_cast<float>(y)});
+                enemies.push_back(enemy);
+                //        enemy.playerSpriteOffset({-10, 0});
+            }
+            
             
             
         //doors enabling or disabling logic
@@ -1084,7 +1106,7 @@ int main() {
         //end door logica
         
         for (auto enemy = enemies.begin(); enemy != enemies.end(); ++enemy) {
-            enemy->testFor(player);
+            enemy->testFor(ui,player);
         }
         
         window.clear();
