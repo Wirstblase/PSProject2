@@ -263,7 +263,7 @@ int main() {
     
     // Play the music
     music.setLoop(true);
-    //music.play();
+    music.play();
     
     window.create(sf::VideoMode(900, 900), "gametest1", sf::Style::Titlebar | sf::Style::Close /*sf::Style::Fullscreen*/);
     window.setPosition(centerWindow);
@@ -892,7 +892,7 @@ int main() {
                         //std::cout<<"COLLIDING!";
                         
                         if(itmVec[i] == 1){
-                            std::cout<<"\nDEBUG: COIN COLLECTED\n";
+                            //std::cout<<"\nDEBUG: COIN COLLECTED\n";
                             
                             ui.coins++;
                             //ui.updateStats();
@@ -908,7 +908,7 @@ int main() {
                         
                         if(itmVec[i] == 2){
                             
-                            std::cout<<"\nDEBUG: KNIFE COLLECTED\n";
+                            //std::cout<<"\nDEBUG: KNIFE COLLECTED\n";
                             itemPickupSfx.stop();
                             itemPickupSfx.play();
                             
@@ -935,7 +935,7 @@ int main() {
                         
                         if(itmVec[i] == 3){
                             
-                            std::cout<<"\nDEBUG: BLUE CANDY COLLECTED";
+                            //std::cout<<"\nDEBUG: BLUE CANDY COLLECTED";
                             itemPickupSfx.stop();
                             itemPickupSfx.play();
                             ui.movementSpeed = ui.movementSpeed + 0.05;
@@ -944,7 +944,7 @@ int main() {
                         
                         if(itmVec[i] == 4){
                             
-                            std::cout<<"\nDEBUG: RED CANDY COLLECTED";
+                            //std::cout<<"\nDEBUG: RED CANDY COLLECTED";
                             itemPickupSfx.stop();
                             itemPickupSfx.play();
                             ui.movementSpeed = ui.movementSpeed - 0.05;
@@ -954,7 +954,7 @@ int main() {
                         
                         if(itmVec[i] == 5){
                             
-                            std::cout<<"\nDEBUG: JACK O LANTERN COLLECTED";
+                            //std::cout<<"\nDEBUG: JACK O LANTERN COLLECTED";
                             itemPickupSfx.stop();
                             itemPickupSfx.play();
                             
