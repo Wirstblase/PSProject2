@@ -515,6 +515,8 @@ int main() {
     ui.updateStats();
     ui.updateCoinLabel();
     
+    
+    
     //Main Loop:
     while (window.isOpen()) {
         
@@ -679,6 +681,9 @@ int main() {
         shouldLoadLevel = 0;
         }
         
+        //int test = std::rand() % 3;
+        //std::cout<<"\n test ="<<test;
+        
         if(shouldLoadItems == 1){
             
             // ITEMGRID FOR LEVEL LOADER
@@ -822,6 +827,87 @@ int main() {
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::C)) {
             ui.activeItemSlot = 3;
+        }
+        
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+            
+            
+            
+            if( player.activeItem == 5 ){
+                
+                std::cout<<"\n USED JACK O LANTERN!!!";
+                
+                
+                if(ui.activeItemSlot == 1){
+                    ui.inventory[0] = 0;
+                    ui.itmSlSp1.setTexture(emptyTex);
+                } else if(ui.activeItemSlot == 2){
+                    ui.inventory[1] = 0;
+                    ui.itmSlSp2.setTexture(emptyTex);
+                } else if(ui.activeItemSlot == 3){
+                    ui.inventory[2] = 0;
+                    ui.itmSlSp3.setTexture(emptyTex);
+                }
+                
+                ui.itmSlSp1.setTexture(emptyTex);
+                ui.itmSlSp2.setTexture(emptyTex);
+                ui.itmSlSp3.setTexture(emptyTex);
+                
+                player.activeItemSprite.setTexture(emptyTex);
+                
+                
+                
+                //hp, speed, damage
+                int r = std::rand() % 3;
+                
+                
+                if(r == 1){ //hp
+                    
+                    int a = std::rand() % 3;
+                    int b = std::rand() % 2;
+                    
+                    if(b == 0){
+                        ui.health = ui.health + a;
+                    } else {
+                        ui.health = ui.health - a;
+                    }
+                    
+                } else if (r == 2){ //speed
+                    
+                    float a = std::rand() % 10;
+                    int b = std::rand() % 2;
+                    
+                    if(b == 0){
+                        ui.movementSpeed = ui.movementSpeed + a / 100;
+                    } else {
+                        ui.movementSpeed = ui.movementSpeed - a / 100;
+                    }
+                    
+                } else if (r == 3){ //damage
+                    
+                    float a = std::rand() % 10;
+                    int b = std::rand() % 2;
+                    
+                    if(b == 0){
+                        ui.damage = ui.damage + a / 100;
+                    } else {
+                        ui.damage = ui.damage - a / 100;
+                    }
+                    
+                }
+                
+                std::cout<<"\n r = "<<r;
+                
+                player.activeItem = 0;
+                //ui.inventory[ui.activeItemSlot] = 0; //deletes item
+                
+                
+                
+                
+            }
+            
+            
+            
         }
         
         //Event Loop:
@@ -1042,6 +1128,8 @@ int main() {
             }
             
         //end player update item logic
+            
+            
         
         
         //door logic
